@@ -8,3 +8,4 @@ bin           = @["alatar"]
 binDir        = "bin/"
 
 requires "nim >= 2.2.10"
+requires "parsetoml"

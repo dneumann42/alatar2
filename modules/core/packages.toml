@@ -1,0 +1,35 @@
+[[package]]
+name = "base-devel"
+source = "arch"
+before = true
+tags = ["build", "system"]
+
+[[package]]
+name = "git"
+source = "arch"
+before = true
+tags = ["dev", "vcs"]
+
+[[package]]
+name = "gnome-keyring"
+source = "arch"
+before = true
+tags = ["system", "secrets"]
+
+[[package]]
+name = "paru"
+source = "aur"
+before = true
+tags = ["system", "packaging"]
+
+[[package]]
+name = "flatpak"
+source = "arch"
+before = true
+tags = ["system", "packaging"]
+
+[[package]]
+name = "emacs"
+source = "arch"
+before = true
+tags = ["dev", "editor"]

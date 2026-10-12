@@ -1,0 +1,599 @@
+[[package]]
+name = "nftables"
+source = "arch"
+tags = ["firewall"]
+
+[[package]]
+name = "swayfx"
+source = "aur"
+tags = ["compositor", "wayland"]
+
+[[package]]
+name = "xdg-desktop-portal-wlr"
+source = "arch"
+tags = ["wayland", "system"]
+
+[[package]]
+name = "xorg-xwayland"
+source = "arch"
+tags = ["wayland"]
+
+[[package]]
+name = "wl-clipboard"
+source = "arch"
+tags = ["wayland", "cli"]
+
+[[package]]
+name = "swayidle"
+source = "arch"
+tags = ["wayland", "compositor"]
+
+[[package]]
+name = "swaylock"
+source = "arch"
+tags = ["wayland", "security"]
+
+[[package]]
+name = "sway-contrib"
+source = "arch"
+tags = ["wayland", "compositor"]
+
+[[package]]
+name = "swayimg"
+source = "arch"
+tags = ["wayland", "images"]
+
+[[package]]
+name = "mako"
+source = "arch"
+tags = ["wayland", "notifications"]
+
+[[package]]
+name = "wofi"
+source = "arch"
+tags = ["wayland", "launcher"]
+
+[[package]]
+name = "wmenu"
+source = "arch"
+tags = ["wayland", "launcher"]
+
+[[package]]
+name = "wallust-git"
+source = "aur"
+tags = ["wayland", "theming"]
+
+[[package]]
+name = "awww"
+source = "arch"
+tags = ["wayland", "media"]
+
+[[package]]
+name = "polkit-gnome"
+source = "arch"
+tags = ["wayland", "system"]
+
+[[package]]
+name = "lxqt-policykit"
+source = "arch"
+tags = ["wayland", "system"]
+
+[[package]]
+name = "lxqt-openssh-askpass"
+source = "arch"
+tags = ["wayland", "system"]
+
+[[package]]
+name = "gvfs"
+source = "arch"
+tags = ["system"]
+
+[[package]]
+name = "gvfs-dnssd"
+source = "arch"
+tags = ["system"]
+
+[[package]]
+name = "kitty"
+source = "arch"
+tags = ["terminal", "wayland"]
+
+[[package]]
+name = "tmux"
+source = "arch"
+tags = ["terminal", "shell"]
+
+[[package]]
+name = "emacs"
+source = "arch"
+tags = ["editor"]
+
+[[package]]
+name = "zed"
+source = "arch"
+tags = ["editor"]
+
+[[package]]
+name = "opencode"
+source = "arch"
+tags = ["editor", "ai", "cli"]
+
+[[package]]
+name = "github-cli"
+source = "arch"
+tags = ["dev", "cli"]
+
+[[package]]
+name = "cmake"
+source = "arch"
+tags = ["build"]
+
+[[package]]
+name = "flatpak-builder"
+source = "arch"
+tags = ["build", "packaging"]
+
+[[package]]
+name = "sbcl"
+source = "arch"
+tags = ["lang", "dev", "alatar"]
+
+[[package]]
+name = "vulkan-headers"
+source = "arch"
+tags = ["dev", "graphics"]
+
+[[package]]
+name = "sdl3"
+source = "arch"
+tags = ["libs", "gaming"]
+
+[[package]]
+name = "sdl3_image"
+source = "arch"
+tags = ["libs", "gaming"]
+
+[[package]]
+name = "sdl3_ttf"
+source = "arch"
+tags = ["libs", "gaming"]
+
+[[package]]
+name = "pcre"
+source = "arch"
+tags = ["libs"]
+
+[[package]]
+name = "waterfox-bin"
+source = "aur"
+tags = ["browser"]
+
+[[package]]
+name = "discord"
+source = "arch"
+tags = ["social"]
+
+[[package]]
+name = "pipewire-audio"
+source = "arch"
+tags = ["audio"]
+
+[[package]]
+name = "pipewire-alsa"
+source = "arch"
+tags = ["audio"]
+
+[[package]]
+name = "pipewire-jack"
+source = "arch"
+tags = ["audio"]
+
+[[package]]
+name = "wireplumber"
+source = "arch"
+tags = ["audio"]
+
+[[package]]
+name = "helvum"
+source = "arch"
+tags = ["audio", "wayland"]
+
+[[package]]
+name = "easyeffects"
+source = "arch"
+tags = ["audio"]
+
+[[package]]
+name = "pavucontrol"
+source = "arch"
+tags = ["audio"]
+
+[[package]]
+name = "ncmpcpp"
+source = "arch"
+tags = ["audio", "cli"]
+
+[[package]]
+name = "mopidy"
+source = "arch"
+tags = ["audio"]
+
+[[package]]
+name = "mopidy-local"
+source = "aur"
+tags = ["audio"]
+
+[[package]]
+name = "playerctl"
+source = "arch"
+tags = ["media", "wayland"]
+
+[[package]]
+name = "mpv"
+source = "arch"
+tags = ["media"]
+
+[[package]]
+name = "strawberry"
+source = "arch"
+tags = ["media", "audio"]
+
+[[package]]
+name = "yt-dlp"
+source = "arch"
+tags = ["media", "cli"]
+
+[[package]]
+name = "obs-studio"
+source = "arch"
+tags = ["media", "streaming"]
+
+[[package]]
+name = "gimp"
+source = "arch"
+tags = ["creative", "images"]
+
+[[package]]
+name = "blender"
+source = "arch"
+tags = ["creative", "3d"]
+
+[[package]]
+name = "imagemagick"
+source = "arch"
+tags = ["images", "cli"]
+
+[[package]]
+name = "resvg"
+source = "arch"
+tags = ["images", "cli"]
+
+[[package]]
+name = "wine"
+source = "arch"
+tags = ["gaming", "windows"]
+
+[[package]]
+name = "winboat-bin"
+source = "aur"
+tags = ["gaming", "windows"]
+
+[[package]]
+name = "zathura"
+source = "arch"
+tags = ["pdf", "documents"]
+
+[[package]]
+name = "zathura-pdf-mupdf"
+source = "arch"
+tags = ["pdf"]
+
+[[package]]
+name = "calibre"
+source = "arch"
+tags = ["ebooks", "productivity"]
+
+[[package]]
+name = "gnome-calendar"
+source = "arch"
+tags = ["productivity"]
+
+[[package]]
+name = "calcurse"
+source = "arch"
+tags = ["productivity", "cli"]
+
+[[package]]
+name = "pandoc-cli"
+source = "arch"
+tags = ["docs", "cli"]
+
+[[package]]
+name = "texlive-basic"
+source = "arch"
+tags = ["docs", "tex"]
+
+[[package]]
+name = "texlive-bin"
+source = "arch"
+tags = ["docs", "tex"]
+
+[[package]]
+name = "texlive-binextra"
+source = "arch"
+tags = ["docs", "tex"]
+
+[[package]]
+name = "texlive-fontsrecommended"
+source = "arch"
+tags = ["docs", "tex", "fonts"]
+
+[[package]]
+name = "texlive-latex"
+source = "arch"
+tags = ["docs", "tex"]
+
+[[package]]
+name = "texlive-latexextra"
+source = "arch"
+tags = ["docs", "tex"]
+
+[[package]]
+name = "texlive-latexrecommended"
+source = "arch"
+tags = ["docs", "tex"]
+
+[[package]]
+name = "dvisvgm"
+source = "arch"
+tags = ["docs", "tex"]
+
+[[package]]
+name = "transmission-cli"
+source = "arch"
+tags = ["network", "cli"]
+
+[[package]]
+name = "bat"
+source = "arch"
+tags = ["cli"]
+
+[[package]]
+name = "btop"
+source = "arch"
+tags = ["cli", "system"]
+
+[[package]]
+name = "cloc"
+source = "arch"
+tags = ["cli", "dev"]
+
+[[package]]
+name = "dialog"
+source = "arch"
+tags = ["cli"]
+
+[[package]]
+name = "fd"
+source = "arch"
+tags = ["cli", "shell"]
+
+[[package]]
+name = "fzf"
+source = "arch"
+tags = ["cli", "shell"]
+
+[[package]]
+name = "jq"
+source = "arch"
+tags = ["cli"]
+
+[[package]]
+name = "less"
+source = "arch"
+tags = ["cli"]
+
+[[package]]
+name = "lesspipe"
+source = "arch"
+tags = ["cli"]
+
+[[package]]
+name = "pass"
+source = "arch"
+tags = ["cli", "secrets"]
+
+[[package]]
+name = "rsync"
+source = "arch"
+tags = ["cli", "system"]
+
+[[package]]
+name = "unzip"
+source = "arch"
+tags = ["cli"]
+
+[[package]]
+name = "which"
+source = "arch"
+tags = ["cli"]
+
+[[package]]
+name = "yazi"
+source = "arch"
+tags = ["cli", "filemanager"]
+
+[[package]]
+name = "pcmanfm-qt"
+source = "arch"
+tags = ["filemanager"]
+
+[[package]]
+name = "zoxide"
+source = "arch"
+tags = ["shell", "cli"]
+
+[[package]]
+name = "base"
+source = "arch"
+tags = ["system"]
+
+[[package]]
+name = "linux"
+source = "arch"
+tags = ["system", "kernel"]
+
+[[package]]
+name = "linux-firmware"
+source = "arch"
+tags = ["system", "firmware"]
+
+[[package]]
+name = "amd-ucode"
+source = "arch"
+tags = ["system", "firmware"]
+
+[[package]]
+name = "mkinitcpio"
+source = "arch"
+tags = ["system"]
+
+[[package]]
+name = "nvidia-open"
+source = "arch"
+tags = ["system", "nvidia"]
+
+[[package]]
+name = "nvidia-utils"
+source = "arch"
+tags = ["system", "nvidia"]
+
+[[package]]
+name = "nvidia-settings"
+source = "arch"
+tags = ["nvidia"]
+
+[[package]]
+name = "mesa-utils"
+source = "arch"
+tags = ["system", "graphics"]
+
+[[package]]
+name = "zram-generator"
+source = "arch"
+tags = ["system"]
+
+[[package]]
+name = "btrfs-progs"
+source = "arch"
+tags = ["system", "filesystem"]
+
+[[package]]
+name = "efibootmgr"
+source = "arch"
+tags = ["system"]
+
+[[package]]
+name = "sudo"
+source = "arch"
+tags = ["system"]
+
+[[package]]
+name = "networkmanager"
+source = "arch"
+tags = ["system", "network"]
+
+[[package]]
+name = "openssh"
+source = "arch"
+tags = ["system", "network"]
+
+[[package]]
+name = "bluez"
+source = "arch"
+tags = ["system", "bluetooth"]
+
+[[package]]
+name = "bluez-utils"
+source = "arch"
+tags = ["system", "bluetooth"]
+
+[[package]]
+name = "fuse2"
+source = "arch"
+tags = ["system"]
+
+[[package]]
+name = "sysd-manager"
+source = "aur"
+tags = ["system", "gui"]
+
+[[package]]
+name = "podman"
+source = "arch"
+tags = ["containers"]
+
+[[package]]
+name = "podman-compose"
+source = "arch"
+tags = ["containers"]
+
+[[package]]
+name = "act"
+source = "arch"
+tags = ["virtualization"]
+
+[[package]]
+name = "spice"
+source = "arch"
+tags = ["virtualization"]
+
+[[package]]
+name = "spice-gtk"
+source = "arch"
+tags = ["virtualization"]
+
+[[package]]
+name = "spice-protocol"
+source = "arch"
+tags = ["virtualization"]
+
+[[package]]
+name = "spice-vdagent"
+source = "arch"
+tags = ["virtualization"]
+
+[[package]]
+name = "noto-fonts-emoji"
+source = "arch"
+tags = ["fonts"]
+
+[[package]]
+name = "ttf-nerd-fonts-symbols"
+source = "arch"
+tags = ["fonts"]
+
+[[package]]
+name = "ttf-nerd-fonts-symbols-mono"
+source = "arch"
+tags = ["fonts"]
+
+[[package]]
+name = "com.moonlight_stream.Moonlight"
+source = "flatpak"
+tags = ["gaming", "streaming"]
+
+[[package]]
+name = "dev.lizardbyte.app.Sunshine"
+source = "flatpak"
+tags = ["gaming", "streaming"]
+
+[[package]]
+name = "io.lmms.LMMS"
+source = "flatpak"
+tags = ["music", "creative"]
+
+[[package]]
+name = "org.gnome.Boxes"
+source = "flatpak"
+tags = ["virtualization"]

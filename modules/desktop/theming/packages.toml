@@ -1,0 +1,9 @@
+[[package]]
+name = "wallust"
+source = "aur"
+tags = ["desktop", "theming"]
+
+[[package]]
+name = "awww"
+source = "aur"
+tags = ["desktop", "theming"]

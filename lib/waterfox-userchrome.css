@@ -1,0 +1,304 @@
+/* alatar waterfox chrome: 20px undecorated compact tabs + slim urlbar.
+ * Installed to <profile>/chrome/userChrome.css by lib/setup-waterfox.sh.
+ *
+ * TUNE HERE: every dimension below is a knob. Change a value once in this
+ * block and it propagates to all the rules further down. */
+
+:root {
+  /* tabs */
+  --alatar-tab-height: 20px;
+  --alatar-tab-min-width: 70px;
+  --alatar-tab-inline-padding: 1px;   /* padding between adjacent tabs */
+  --alatar-tab-content-padding: 3px;  /* padding inside a tab, around its content */
+  --alatar-tab-gap: 3px;              /* space between favicon and title */
+  --alatar-selected-tab-tint: 14;     /* % of currentColor for the selected tab bg */
+
+  /* vertical tabs (sidebar column) */
+  --alatar-vtab-width: calc(var(--alatar-tab-height) + 4px);
+  /* Column background for the vertical-tab section. */
+  --alatar-vtab-bg: #000000;
+  /* Width of the whole vertical-tab column (#sidebar-container /
+     sidebar-main / #sidebar-box). Launcher buttons and the newtab button
+     derive their footprint from this and --alatar-nav-icon-size. */
+
+  /* urlbar (search bar) */
+  --alatar-urlbar-height: 20px;
+  --alatar-urlbar-margin-inline: 2px; /* horizontal gap around the bar */
+  --alatar-urlbar-padding-block: 0px; /* vertical "halo" around the bar */
+  --alatar-urlbar-inner-padding: 2px; /* padding inside the input container */
+  --alatar-input-font-size: 12px;
+  --alatar-label-font-size: 11px;
+  --alatar-urlbar-icon-padding: 1px;  /* padding around in-bar icons */
+
+  /* icons */
+  --alatar-icon-size: 14px;           /* small icons: identity, shield, results */
+  --alatar-nav-icon-size: 16px;       /* theme's native toolbar glyph size */
+
+  /* toolbar buttons (back/forward/reload/extensions/hamburger) */
+  --alatar-button-padding-inner: 2px; /* glyph -> button edge */
+  --alatar-button-padding-outer: 1px; /* button -> button */
+
+  /* urlbar dropdown (autocomplete) */
+  --alatar-result-row-height: 20px;
+  --alatar-result-inline-padding: 4px;
+
+  /* === derived overrides (do not edit; they consume the knobs) === */
+  --urlbar-min-height: var(--alatar-urlbar-height) !important;
+  --urlbar-padding-block: var(--alatar-urlbar-padding-block) !important;
+  --urlbar-margin-inline: var(--alatar-urlbar-margin-inline) !important;
+  --urlbar-basic-component-size: var(--alatar-icon-size) !important;
+  --urlbar-icon-padding: var(--alatar-urlbar-icon-padding) !important;
+  --urlbar-input-container-padding: var(--alatar-urlbar-icon-padding) !important;
+  --toolbarbutton-padding-inner: var(--alatar-button-padding-inner) !important;
+  --toolbarbutton-padding-outer: var(--alatar-button-padding-outer) !important;
+}
+
+/* ================= tabs ================= */
+
+#TabsToolbar {
+  --tab-min-height: var(--alatar-tab-height) !important;
+  --tab-min-width: var(--alatar-tab-min-width) !important;
+  --tab-inline-padding: var(--alatar-tab-inline-padding) !important;
+  --tab-block-margin: 0px !important;
+  --tab-shadow-max-size: 0px !important;
+  --tab-bottom-space: 0px !important;
+  --tabs-navbar-shadow-size: 0px !important;
+}
+
+#tabbrowser-tabs,
+#tabbrowser-arrowscrollbox {
+  --tab-min-height: var(--alatar-tab-height) !important;
+}
+
+.tabbrowser-tab {
+  height: var(--alatar-tab-height) !important;
+  min-height: var(--alatar-tab-height) !important;
+  max-height: var(--alatar-tab-height) !important;
+  vertical-align: top !important;
+  padding: 0 var(--alatar-tab-inline-padding) !important;
+  margin: 0 !important;
+}
+
+/* Strip all decoration: Proton tab shapes, separators, accent line,
+   rounded backgrounds, shadows. */
+.tabbrowser-tab,
+.tab-stack,
+.tab-background,
+.tab-content {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+.tabbrowser-tab::before,
+.tabbrowser-tab::after {
+  display: none !important; /* tab separators */
+}
+
+.tab-line,
+.tab-throbber,
+.tab-icon-overlay:not([sharing]),
+.tab-audio-button,
+.tab-close-button {
+  display: none !important;
+}
+
+/* Reduce every inner padding to the minimum. */
+.tab-content {
+  padding-inline: var(--alatar-tab-content-padding) !important;
+  padding-block: 0 !important;
+  gap: var(--alatar-tab-gap) !important;
+}
+
+.tabbrowser-tab[selected] .tab-background {
+  background: color-mix(in srgb, currentColor calc(var(--alatar-selected-tab-tint) * 1%), transparent) !important;
+}
+
+/* ================= vertical tabs =================
+ * With sidebar.verticalTabs on, the tab strip lives in sidebar-main inside
+ * #sidebar-container/#sidebar-box. The classic rules on #sidebar-box are
+ * width:18em / min-width:14em - that is the fat parent you see. Waterfox
+ * itself only sets a min of var(--tab-collapsed-width) on the collapsed
+ * sidebar-main, so we pin the whole chain to one knob. Guarded by the same
+ * pref the vertical-tabs toggle writes, so plain sidebars stay resizable. */
+
+@media -moz-pref("sidebar.verticalTabs") {
+  :root {
+    --sidebar-launcher-collapsed-width: var(--alatar-vtab-width) !important;
+    --sidebar-auto-hide-width: var(--alatar-vtab-width) !important;
+    /* The launcher moz-buttons inside sidebar-main's shadow DOM size their
+       icons/min-height from --tab-min-height, and shadow content can only be
+       reached through inherited custom properties. */
+    --tab-min-height: var(--alatar-tab-height) !important;
+    /* Column colors: themes paint the sidebar via these tokens (and the
+       expand-on-hover backdrop uses --toolbox-background-color). */
+    --sidebar-background-color: var(--alatar-vtab-bg) !important;
+    --toolbox-background-color: var(--alatar-vtab-bg) !important;
+  }
+
+  #sidebar-container,
+  sidebar-main,
+  #sidebar-box {
+    background-color: var(--alatar-vtab-bg) !important;
+    background-image: none !important;
+  }
+
+  /* Tokens the shadow DOM launcher rules read but do not define themselves:
+     shrinking these shrinks the launcher buttons (icon + outer padding) to
+     fit the column. --alatar-nav-icon-size + 2 x side padding = column. */
+  sidebar-main {
+    --space-medium: calc((var(--alatar-vtab-width) - var(--alatar-nav-icon-size)) / 2);
+    --space-small: calc((var(--alatar-vtab-width) - var(--alatar-nav-icon-size)) / 2);
+    --space-xxsmall: 0px;
+  }
+
+  #sidebar-container,
+  sidebar-main,
+  #sidebar-box {
+    width: var(--alatar-vtab-width) !important;
+    inline-size: var(--alatar-vtab-width) !important;
+    min-inline-size: var(--alatar-vtab-width) !important;
+    max-inline-size: var(--alatar-vtab-width) !important;
+    min-width: var(--alatar-vtab-width) !important;
+  }
+
+  /* Match the collapsed vertical tab metrics to the same knob. */
+  :root {
+    --tab-collapsed-background-width: var(--alatar-vtab-width) !important;
+    --tab-collapsed-width: var(--alatar-vtab-width) !important;
+  }
+
+  /* No drag-space between column and content. */
+  #sidebar-splitter,
+  #sidebar-launcher-splitter {
+    width: 0 !important;
+    min-width: 0 !important;
+    border: none !important;
+  }
+
+  #vertical-tabs .tabbrowser-tab,
+  #pinned-tabs-container .tabbrowser-tab {
+    height: var(--alatar-tab-height) !important;
+    min-height: var(--alatar-tab-height) !important;
+  }
+
+  /* New-tab button: its theme rule gives min-height: var(--tab-min-height)
+     and padding from tab inline vars - pin it to the column instead. */
+  #vertical-tabs-newtab-button,
+  #tabs-newtab-button,
+  #new-tab-button {
+    appearance: none;
+    width: var(--alatar-vtab-width) !important;
+    min-height: var(--alatar-tab-height) !important;
+    max-height: var(--alatar-tab-height) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #vertical-tabs-newtab-button > .toolbarbutton-icon,
+  #tabs-newtab-button > .toolbarbutton-icon,
+  #new-tab-button > .toolbarbutton-icon {
+    width: var(--alatar-icon-size) !important;
+    height: var(--alatar-icon-size) !important;
+    padding: 0 !important;
+  }
+
+  /* Remove the extra vertical breathing room and decorations from the strip
+     so it reads as one dense column. */
+  #vertical-tabs,
+  #pinned-tabs-container {
+    --tab-block-margin: 0px !important;
+    --tab-inline-padding: 0px !important;
+  }
+
+  #sidebar-box #sidebar-header {
+    display: none; /* the switcher header eats height above a 24px strip */
+  }
+}
+
+/* ================= unified toolbar (urlbar section) =================
+ * Firefox 140+/Waterfox G computes urlbar and button metrics from tokens
+ * defined on :root (urlbar.tokens.css / toolbarbuttons.css), which is why
+ * the overrides above also live on :root. */
+
+.urlbar-container,
+#urlbar-container {
+  padding-block: var(--alatar-urlbar-padding-block) !important;
+  margin-inline: var(--alatar-urlbar-margin-inline) !important;
+  min-height: 0 !important;
+}
+
+#urlbar,
+#urlbar > .urlbar-input-container,
+#urlbar-background {
+  height: var(--alatar-urlbar-height) !important;
+  min-height: var(--alatar-urlbar-height) !important;
+  max-height: var(--alatar-urlbar-height) !important;
+  border-radius: 0 !important;
+}
+
+#urlbar-input {
+  font-size: var(--alatar-input-font-size) !important;
+  padding-inline: calc(var(--alatar-urlbar-inner-padding) * 2) !important;
+}
+
+/* The urlbar "breakout" action box hugs the field edges by default. */
+#urlbar > .urlbar-input-container {
+  padding-block: 0 !important;
+  padding-inline: var(--alatar-urlbar-inner-padding) !important;
+}
+
+#urlbar .urlbar-icon,
+#urlbar .identity-box-button,
+#tracking-protection-icon-container,
+#page-action-buttons .urlbar-icon,
+#permissions-granted-icon {
+  width: var(--alatar-nav-icon-size) !important;
+  height: var(--alatar-nav-icon-size) !important;
+  padding: var(--alatar-urlbar-icon-padding) !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+#identity-box {
+  padding: 0 var(--alatar-urlbar-icon-padding) !important;
+}
+
+#identity-icon,
+#tracking-protection-icon,
+.urlbar-icon {
+  width: var(--alatar-icon-size) !important;
+  height: var(--alatar-icon-size) !important;
+}
+
+/* Keep the identity/permutation label readable but tight. */
+#identity-label,
+#identity-icon-label {
+  padding-inline: var(--alatar-urlbar-icon-padding) !important;
+  font-size: var(--alatar-label-font-size) !important;
+}
+
+/* Nav-bar buttons: the icon is fixed by the theme; total button size comes
+   from inner padding (knob above). Belt and braces: */
+#nav-bar .toolbarbutton-1 > .toolbarbutton-icon,
+#nav-bar .toolbarbutton-1 > .toolbarbutton-badge-stack > .toolbarbutton-icon,
+#nav-bar .toolbarbutton-1 {
+  padding: var(--alatar-button-padding-outer) !important;
+  max-height: var(--alatar-urlbar-height) !important;
+}
+
+/* Dropdown/result rows inside the expanded urlbar. */
+#urlbarView {
+  --urlbarView-item-inline-padding: var(--alatar-result-inline-padding) !important;
+}
+.urlbarView-row {
+  min-height: var(--alatar-result-row-height) !important;
+}
+.urlbarView-favicon,
+.urlbarView-type-icon {
+  width: var(--alatar-icon-size) !important;
+  height: var(--alatar-icon-size) !important;
+}

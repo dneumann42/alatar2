@@ -1,0 +1,10 @@
+[Unit]
+Description=awww wallpaper daemon
+
+[Service]
+Type=exec
+Environment=XDG_BACKEND=wayland
+ExecStart=/usr/bin/awww-daemon
+ExecStartPost=/usr/bin/env sh -c 'sleep 1; exec awww restore'
+Restart=on-failure
+RestartSec=2

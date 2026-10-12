@@ -1,0 +1,6 @@
+#+TITLE: README
+
+packages.toml are resolved first,
+then the services are installed and enabled.
+
+parent packages.toml are resolved before the children

@@ -1,0 +1,14 @@
+[[package]]
+name = "steam"
+source = "arch"
+tags = ["gaming"]
+
+[[package]]
+name = "lutris"
+source = "arch"
+tags = ["gaming"]
+
+[[package]]
+name = "dreamchess"
+source = "aur"
+tags = ["gaming"]
