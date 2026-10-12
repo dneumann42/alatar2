@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+sudo pacman -Syu --needed --noconfirm base-devel emacs
+
+ALATAR_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export ALATAR_HOME="${ALATAR_HOME:-$ALATAR_ROOT}"
+
+if [ -f "$ALATAR_ROOT/.env" ]; then
+    set -a
+    source "$ALATAR_ROOT/.env"
+    set +a
+fi
+
+source "$ALATAR_ROOT/lib/nim.sh"
+nim::ensure
