@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 # ============================================================================
-# swaybar status_command wrapper for the Nim status bar (scripts/statusbar/).
+# swaybar status_command wrapper for the Nim status bar (sway's statusbar/
+# project, a sibling of scripts/).
 # Builds the project with nimble when the binary is missing or any source
 # file is newer than it; then execs the binary (which speaks the i3bar
 # JSON protocol). On a build failure an already-compiled binary still runs.
@@ -9,7 +10,7 @@
 set -u
 
 here="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
-proj="$here/statusbar"
+proj="$here/../statusbar"
 bin="$proj/bin/statusbar"
 
 needs_build=0
