@@ -1,0 +1,7 @@
+include /etc/sway/config.d/*
+include applications.conf
+include keybindings.conf
+include appearance.conf
+include bar.conf
+include displays.conf
+include window-rules.conf 

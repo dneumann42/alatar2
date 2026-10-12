@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+# ============================================================================
+# swaybar status_command wrapper for the Nim status bar (scripts/statusbar/).
+# Builds the project with nimble when the binary is missing or any source
+# file is newer than it; then execs the binary (which speaks the i3bar
+# JSON protocol). On a build failure an already-compiled binary still runs.
+# After editing src/statusbar.nim: swaymsg reload (rebuild happens here).
+# ============================================================================
+set -u
+
+here="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
+proj="$here/statusbar"
+bin="$proj/bin/statusbar"
+
+needs_build=0
+if [ ! -x "$bin" ]; then
+    needs_build=1
+elif [ -n "$(find "$proj/src" "$proj/statusbar.nimble" -newer "$bin" 2>/dev/null | head -n1)" ]; then
+    needs_build=1
+fi
+
+if [ "$needs_build" = 1 ] && command -v nimble >/dev/null 2>&1; then
+    log="$proj/build.log"
+    if (cd "$proj" && nimble --offline build) >"$log" 2>&1; then
+        rm -f "$log"
+    else
+        echo "status: nimble build failed, see $log" >&2
+    fi
+fi
+
+if [ -x "$bin" ]; then
+    exec "$bin"
+fi
+
+echo "status: $bin not built and nimble unavailable (PATH: $PATH)" >&2
+exit 1

@@ -1,0 +1,55 @@
+/* Wofi — dark, rounded, large icons */
+
+window {
+    background-color: rgba(0, 0, 0, 0.75);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+}
+
+#mainbox {
+    background-color: transparent;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    margin: 0px;
+}
+
+#input {
+    background-color: rgba(0, 0, 0, 0.55);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+
+#entry {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 6px 8px;
+    font-size: 13px;
+}
+
+#entry:selected {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+#text:selected {
+    color: #ffffff;
+}
+
+img {
+    min-size: 64px;
+    max-size: 64px;
+    margin: 8px;
+}
+
+/* fade-out animation keeps the rounded look smooth */
+#outer-box {
+    background-color: transparent;
+}

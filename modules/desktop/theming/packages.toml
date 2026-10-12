@@ -1,5 +1,5 @@
 [[package]]
-name = "wallust"
+name = "wallust-git"
 source = "aur"
 tags = ["desktop", "theming"]
 

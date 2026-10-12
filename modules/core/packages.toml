@@ -9,7 +9,6 @@ name = "git"
 source = "arch"
 before = true
 tags = ["dev", "vcs"]
-
 [[package]]
 name = "gnome-keyring"
 source = "arch"
@@ -27,9 +26,3 @@ name = "flatpak"
 source = "arch"
 before = true
 tags = ["system", "packaging"]
-
-[[package]]
-name = "emacs"
-source = "arch"
-before = true
-tags = ["dev", "editor"]

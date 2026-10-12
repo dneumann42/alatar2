@@ -4,3 +4,14 @@ packages.toml are resolved first,
 then the services are installed and enabled.
 
 parent packages.toml are resolved before the children
+
+symlink.toml files map config sources to their destinations: each table is
+named by a regex (plain paths work) matched against paths relative to the
+modules root - quote keys with `/`. The pattern is applied to the direct
+entries of its metacharacter-free directory prefix, so
+`["desktop/_config/(.*)"]` with `to = "$XDG_CONFIG_HOME/$1"` links every
+config dir below `_config` individually ($0..$9 are capture references).
+Installing links them ($VAR and XDG defaults are expanded), uninstalling
+removes the links; a real file or directory in the way triggers a y/n
+replace prompt. Directories starting with `_` (like `desktop/_config`) are
+the module's own files, never submodules.

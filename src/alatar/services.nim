@@ -4,6 +4,7 @@ type
   ServiceKind* = enum
     service
     timer
+    target
 
   ServiceSpec = object
     unitName*: string   # e.g. "wallpaper.service"
@@ -51,14 +52,19 @@ proc systemctlCapture(args: seq[string]): string {.raises: [ServiceError].} =
       "Failed to run 'systemctl --user " & args.join(" ") & "': " & e.msg, e)
 
 proc loadServices*(moduleDir: string): seq[ServiceSpec] {.raises: [OSError].} =
-  ## Finds '<name>.service.toml' and '<name>.timer.toml' files in a module
-  ## directory. The '.toml' suffix is stripped for the installed unit name.
+  ## Finds '<name>.service.toml', '<name>.timer.toml' and '<name>.target.toml'
+  ## files in a module directory. The '.toml' suffix is stripped for the
+  ## installed unit name.
   for walkKind, path in walkDir(moduleDir):
     if walkKind != pcFile: continue
     let tail = path.lastPathPart
-    if tail.endsWith(".service.toml") or tail.endsWith(".timer.toml"):
+    if tail.endsWith(".service.toml") or tail.endsWith(".timer.toml") or
+        tail.endsWith(".target.toml"):
       let unitName = tail[0 ..< tail.len - ".toml".len]
-      let kind = if unitName.endsWith(".service"): service else: timer
+      let kind =
+        if unitName.endsWith(".service"): service
+        elif unitName.endsWith(".timer"): timer
+        else: target
       result.add ServiceSpec(unitName: unitName, kind: kind, sourcePath: path)
 
 proc installServices*(svcs: seq[ServiceSpec]) {.raises: [ServiceError].} =
@@ -78,7 +84,14 @@ proc installServices*(svcs: seq[ServiceSpec]) {.raises: [ServiceError].} =
     failures.add e.msg
   for svc in svcs:
     try:
-      systemctlCheck(@["enable", "--now", svc.unitName])
+      case svc.kind
+      of service, timer:
+        systemctlCheck(@["enable", "--now", svc.unitName])
+      of target:
+        # Targets are pulled in by the session (or by other units'
+        # WantedBy); they have nothing to enable, so just make sure one
+        # is running.
+        systemctlCheck(@["start", svc.unitName])
     except ServiceError as e:
       failures.add e.msg
   if failures.len > 0:
@@ -113,7 +126,11 @@ proc uninstallServices*(svcs: seq[ServiceSpec]) {.raises: [ServiceError].} =
       continue
     removedAny = true
     try:
-      systemctlCheck(@["disable", "--now", svc.unitName])
+      case svc.kind
+      of service, timer:
+        systemctlCheck(@["disable", "--now", svc.unitName])
+      of target:
+        systemctlCheck(@["stop", svc.unitName])
     except ServiceError as e:
       failures.add e.msg # keep going; the unit may be stopped already
     try:

@@ -1,0 +1,16 @@
+# Show desktop entries (.desktop files + flatpak apps) with icons
+mode=drun
+allow_images=true
+
+# Emacs-style list navigation: Ctrl+n = down, Ctrl+p = up
+key_down=Ctrl-n
+key_up=Ctrl-p
+
+# Appearance
+width=70%
+height=70%
+lines=10
+columns=4
+hide_scroll=true
+insensitive_scroll=true
+location=center

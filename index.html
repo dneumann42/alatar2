@@ -12,9 +12,9 @@
     h1 { font-size: 4em; }
     div { display: flex; flex-direction: column; }
     span { display: flex; flex-direction: row; }
-    input { border: 1px solid white; }
-    button { border: 1px solid blue; background-color: #999; }
-    a { border: 1px solid blue; background-color: #999; display: block; }
+    input { border: 1px solid white; height: 1.5em; }
+    button { border: 1px solid white; background-color: #444; padding: 0px 6px 0px 6px; height:  1.5em; }
+    a { text-decoration: underline; color: lightblue; display: block; }
     .flex { display: flex; }
     .flex-row { flex-direction: row; }
     .flex-col { flex-direction: column; }
@@ -35,16 +35,38 @@
   </style>
 </head>
 <body class="flex flex-column justify-center items-center w100 h100">
-  <div class="items-start">
-    <h1> Alatar </h1>
+  <div class="flex flex-column justify-center gap-md items-center">
+    <div class="flex flex-column items-start gap-md">
+      <h1>Search</h1>
 
-    <form action="https://duckduckgo.com/" method="get" target="_blank">
-      <input name="q" type="search" placeholder="Search DuckDuckGo" required>
-      <button type="submit">Search</button>
-    </form>
-    
-    <a href="https://duck.ai/" target="_blank"> Duck AI </a>
+      <form action="https://duckduckgo.com/" method="get" target="_blank">
+        <span class="gap-sm items-center">
+          <span class="items-center">
+            <input name="q" type="search" placeholder="Search DuckDuckGo" required>
+            <button type="submit">Search</button>
+          </span>
+          <a href="https://duck.ai/" target="_blank"> Duck AI </a>
+        </span>
+      </form>
+    </div>
+
+    <ul class="flex flex-row gap-md">
+      <li>
+        <a href="https://youtube.com"> YouTube </a>
+      </li>
+      <li>
+        <a href="https://mail.proton.me/u/1/inbox#category=primary"> Mail </a>
+      </li>
+      <li>
+        <a href="https://drive.proton.me"> Drive </a>
+      </li>
+      <li>
+        <a href="https://docs.proton.me"> Documents </a>
+      </li>
+      <li>
+        <a href="https://google.com"> Google </a>
+      </li>
+    </ul>
   </div>
-  <div> </div>
 </body>
 </html>

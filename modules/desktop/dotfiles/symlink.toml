@@ -1,0 +1,2 @@
+["desktop/_config/(.*)"]
+to = "$XDG_CONFIG_HOME/$1"

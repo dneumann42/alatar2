@@ -1,0 +1,2668 @@
+{
+ "QtGtk3Palettes": {
+  "SystemPalette": {
+   "Window": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Base": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#000000",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "AlternateBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#111318",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "WindowText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Text": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ButtonText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Button": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#161922",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Background": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Foreground": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Highlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "HighlightedText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Light": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#b4befe",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Midlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Mid": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Dark": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Shadow": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#585b70",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Link": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "LinkVisited": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#cba6f7",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "PlaceholderText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#6c7086",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ]
+  },
+  "CheckBoxPalette": {
+   "Window": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Base": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#000000",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "AlternateBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#111318",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "WindowText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Text": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ButtonText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Button": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#161922",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Background": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Foreground": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Highlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "HighlightedText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Light": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#b4befe",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Midlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Mid": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Dark": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Shadow": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#585b70",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Link": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "LinkVisited": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#cba6f7",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "PlaceholderText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#6c7086",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ]
+  },
+  "RadioButtonPalette": {
+   "Window": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Base": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#000000",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "AlternateBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#111318",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "WindowText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Text": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ButtonText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Button": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#161922",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Background": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Foreground": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Highlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "HighlightedText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Light": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#b4befe",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Midlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Mid": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Dark": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Shadow": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#585b70",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Link": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "LinkVisited": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#cba6f7",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "PlaceholderText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#6c7086",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ]
+  },
+  "ComboBoxPalette": {
+   "Window": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Base": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#000000",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "AlternateBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#111318",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "WindowText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Text": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ButtonText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Button": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#161922",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Background": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Foreground": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Highlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "HighlightedText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Light": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#b4befe",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Midlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Mid": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Dark": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Shadow": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#585b70",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Link": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "LinkVisited": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#cba6f7",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "PlaceholderText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#6c7086",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ]
+  },
+  "GroupBoxPalette": {
+   "Window": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Base": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#000000",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "AlternateBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#111318",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "WindowText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Text": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ButtonText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Button": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#161922",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Background": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Foreground": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Highlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "HighlightedText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Light": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#b4befe",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Midlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Mid": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Dark": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Shadow": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#585b70",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Link": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "LinkVisited": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#cba6f7",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "PlaceholderText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#6c7086",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ]
+  },
+  "MenuPalette": {
+   "Window": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Base": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#000000",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "AlternateBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#111318",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "WindowText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Text": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ButtonText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Button": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#161922",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Background": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Foreground": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Highlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "HighlightedText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Light": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#b4befe",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Midlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Mid": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Dark": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Shadow": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#585b70",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Link": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "LinkVisited": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#cba6f7",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "PlaceholderText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#6c7086",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ]
+  },
+  "TabBarPalette": {
+   "Window": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Base": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#000000",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "AlternateBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#111318",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "WindowText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Text": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ButtonText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Button": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#161922",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Background": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Foreground": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Highlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "HighlightedText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Light": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#b4befe",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Midlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Mid": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Dark": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Shadow": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#585b70",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Link": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "LinkVisited": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#cba6f7",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "PlaceholderText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#6c7086",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ]
+  },
+  "TextLineEditPalette": {
+   "Window": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Base": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#000000",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "AlternateBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#111318",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "WindowText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Text": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ButtonText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Button": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#161922",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Background": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Foreground": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Highlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "HighlightedText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Light": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#b4befe",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Midlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Mid": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Dark": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Shadow": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#585b70",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Link": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "LinkVisited": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#cba6f7",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "PlaceholderText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#6c7086",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ]
+  },
+  "LabelPalette": {
+   "Window": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Base": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#000000",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "AlternateBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#111318",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipBase": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ToolTipText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "WindowText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Text": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "ButtonText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Button": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#161922",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Background": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Foreground": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#e6eaf2",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Highlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "HighlightedText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#0b0d12",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Light": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#b4befe",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Midlight": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Mid": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Dark": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#89b4fa",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Shadow": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#585b70",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "Link": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#74c7ec",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "LinkVisited": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#cba6f7",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ],
+   "PlaceholderText": [
+    {
+     "ColorGroup": "All",
+     "ColorScheme": "Unknown",
+     "SourceType": "Fixed",
+     "SourceData": {
+      "FixedBrush": {
+       "Color": "#6c7086",
+       "Width": -1,
+       "Height": -1
+      }
+     }
+    }
+   ]
+  }
+ }
+}

@@ -1,4 +1,4 @@
-import std/[os, osproc, strutils, sugar, sequtils, posix]
+import std/[os, osproc, strutils, sugar, posix]
 
 import parsetoml
 
@@ -15,6 +15,13 @@ type
     tags: seq[string]
 
   PackageError* = object of CatchableError
+
+# Read-only accessors: fields stay private so specs cannot be mutated from
+# outside (e.g. by the CLI), but can be inspected.
+proc name*(pkg: PackageSpec): string = pkg.name
+proc source*(pkg: PackageSpec): PackageSource = pkg.source
+proc before*(pkg: PackageSpec): bool = pkg.before
+proc tags*(pkg: PackageSpec): seq[string] = pkg.tags
 
 proc fromStr*(T: typedesc[PackageSource], str: string): T {.raises: [PackageError].} =
   for s in low(T) .. high(T):
@@ -117,6 +124,11 @@ proc isInstalled*(pkg: PackageSpec): bool {.raises: [PackageError].} =
     runCmd("flatpak", @["info", pkg.name], quiet = true) == 0
 
 proc install*(pkg: PackageSpec) {.raises: [PackageError].} =
+  ## Installs the package unless it is already present (see isInstalled).
+  ## The makepkg path especially needs this: pacman -U would otherwise
+  ## rebuild and reinstall e.g. paru from source on every run.
+  if pkg.isInstalled():
+    return
   case pkg.source
   of arch:
     if pkg.before:
@@ -132,11 +144,22 @@ proc install*(pkg: PackageSpec) {.raises: [PackageError].} =
     runPrivileged("flatpak", @["install", "-y", "flathub", pkg.name])
 
 proc installAll*(specs: seq[PackageSpec]) {.raises: [PackageError].} =
-  # Bootstrap packages (before = true) first, via pacman/git+makepkg, then
-  # everything else through paru (which covers both arch and AUR) and flatpak.
+  # Already-installed packages are skipped before anything is dispatched,
+  # so a re-run costs one `pacman -Q` per package instead of AUR rebuilds.
+  # What is missing is then batched per manager, bootstrap
+  # (before = true) first via pacman / git+makepkg, then everything else
+  # through paru (which covers both arch and AUR) and flatpak.
   var
     pacmanPkgs, paruPkgs, aurBootPkgs, flatpakPkgs: seq[string]
+  var failures: seq[string]
   for spec in specs:
+    var missing = true
+    try:
+      missing = not spec.isInstalled()
+    except PackageError as e:
+      failures.add "Could not verify '" & spec.name & "', installing anyway: " & e.msg
+    if not missing:
+      continue
     if spec.source == flatpak:
       flatpakPkgs.add spec.name
     elif spec.before:
@@ -145,7 +168,6 @@ proc installAll*(specs: seq[PackageSpec]) {.raises: [PackageError].} =
     else:
       paruPkgs.add spec.name
 
-  var failures: seq[string]
   template step(body: untyped) =
     try:
       body

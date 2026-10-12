@@ -1,0 +1,19 @@
+[Unit]
+Description=Emacs daemon
+Documentation=man:emacs(1) https://gnu.org/software/emacs
+# The daemon is useful beyond the graphical session (e.g. from SSH), so it
+# binds to the user's default.target rather than the sway session target.
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/emacs --daemon
+# Graceful shutdown: asks the daemon itself to quit, so buffers get saved
+# hooks a chance to run; --kill would be the abrupt variant.
+ExecStop=/usr/bin/emacsclient --shutdown
+# Re-evaluate the init file without losing the running server/clients.
+ExecReload=/usr/bin/emacsclient --eval "(progn (server-kill) (load user-init-file) (server-start))"
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

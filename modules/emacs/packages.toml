@@ -1,0 +1,5 @@
+[[package]]
+name = "emacs"
+source = "arch"
+before = true
+tags = ["dev", "editor"]

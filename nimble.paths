@@ -1,3 +1,4 @@
 --noNimblePath
+--path:"/home/dneumann/.nimble/pkgs2/cligen-1.11.0-7ab5190b7ea21aab752bcd03f2ca2b71b048ec4f"
 --path:"/home/dneumann/.nimble/pkgs2/parsetoml-0.7.2-2a9fb57ef1f6460fd61b1cfab2d83af44f788a25"
 --path:"/home/dneumann/.alatar2/src"

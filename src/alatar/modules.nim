@@ -1,6 +1,6 @@
 import std/[os, strutils, sequtils]
 
-import alatar/[packages, services]
+import alatar/[packages, services, symlinks]
 
 type
   ModuleStatus* = enum Installed, Error, NotInstalled
@@ -23,6 +23,10 @@ type
 proc loadModules*(moduleDir: string): seq[Module] {.raises: [IOError, OSError].} =
   for kind, path in walkDir(moduleDir):
     if kind != pcDir:
+      continue
+    # Directories starting with "_" hold the module's own files (e.g. dotfiles
+    # in desktop/_config), not submodules.
+    if lastPathPart(path).startsWith("_"):
       continue
     var module = Module()
     module.name = lastPathPart(path)
@@ -60,22 +64,25 @@ proc packageFiles(dir: string): seq[string] {.raises: [OSError].} =
     if path.endsWith("packages.toml"):
       result.add path
 
-proc installOwn*(module: Module, dir: string) {.raises: [PackageError, ServiceError, IOError, OSError].} =
-  ## Installs only this module's own packages and units; no dependency or
-  ## submodule resolution (use the registry procs for that).
+proc installOwn*(module: Module, dir, modulesRoot: string) {.
+    raises: [PackageError, ServiceError, SymlinkError, IOError, OSError].} =
+  ## Installs only this module's own packages, symlinks and units; no
+  ## dependency or submodule resolution (use the registry procs for that).
   for path in packageFiles(dir):
     installAll(loadSpecFile(path))
+  installSymlinks(symlinkSpecs(dir, modulesRoot))
   # Units need their packages, so services come last.
   installServices(loadServices(dir))
 
-proc install*(module: Module, moduleDir: string) {.raises: [PackageError, ServiceError, IOError, OSError].} =
+proc install*(module: Module, moduleDir, modulesRoot: string) {.
+    raises: [PackageError, ServiceError, SymlinkError, IOError, OSError].} =
   ## Tree install without dependency resolution. Modules listed in
   ## `dependencies` files are NOT installed here; prefer
   ## `install*(reg: ModuleRegistery, ...)`, which resolves them.
   let dir = moduleDir / module.name
   for subModule in module.subModules:
-    subModule.install(dir)
-  module.installOwn(dir)
+    subModule.install(dir, modulesRoot)
+  module.installOwn(dir, modulesRoot)
 
 proc install*(reg: ModuleRegistery, moduleName: string) {.raises: [ModuleError].} =
   var done, pending: seq[string]
@@ -100,8 +107,8 @@ proc install*(reg: ModuleRegistery, moduleName: string) {.raises: [ModuleError].
       # 2. Submodules next; each resolves its own dependencies recursively.
       for sub in m.subModules:
         installResolved(ResolvedModule(found: true, module: sub, parentDir: res.parentDir / m.name))
-      # 3. Own packages, then own units.
-      m.installOwn(res.parentDir / m.name)
+      # 3. Own packages and symlinks, then own units.
+      m.installOwn(res.parentDir / m.name, reg.moduleDir)
     except CatchableError as e:
       raise newException(ModuleError,
         "Failed to install module '" & m.name & "': " & e.msg, e)
@@ -115,31 +122,38 @@ proc install*(reg: ModuleRegistery, moduleName: string) {.raises: [ModuleError].
     raise newException(ModuleError, "Unknown module: " & moduleName)
   installResolved(res)
 
-proc uninstall*(module: Module, moduleDir: string) {.raises: [PackageError, ServiceError, IOError, OSError].} =
+proc uninstall*(module: Module, moduleDir, modulesRoot: string) {.
+    raises: [PackageError, ServiceError, SymlinkError, IOError, OSError].} =
   let dir = moduleDir / module.name
   # Reverse of install: stop this module's units first, then remove its
-  # packages, then recurse into submodules. Dependencies (other modules) are
-  # intentionally left alone; they may still be in use.
+  # symlinks and packages, then recurse into submodules. Dependencies (other
+  # modules) are intentionally left alone; they may still be in use.
   uninstallServices(loadServices(dir))
+  uninstallSymlinks(symlinkSpecs(dir, modulesRoot))
   for path in packageFiles(dir):
     uninstallAll(loadSpecFile(path))
   for subModule in module.subModules:
-    subModule.uninstall(dir)
+    subModule.uninstall(dir, modulesRoot)
 
 proc uninstall*(reg: ModuleRegistery, moduleName: string) {.raises: [ModuleError].} =
   let res = reg.findModule(moduleName)
   if not res.found:
     raise newException(ModuleError, "Unknown module: " & moduleName)
   try:
-    res.module.uninstall(res.parentDir)
+    res.module.uninstall(res.parentDir, reg.moduleDir)
   except CatchableError as e:
     raise newException(ModuleError, "Failed to uninstall module '" & moduleName & "': " & e.msg, e)
 
-proc status*(reg: ModuleRegistery, moduleName: string): ModuleStatus =
+proc statusDetail*(reg: ModuleRegistery, moduleName: string): (ModuleStatus, seq[string]) =
+  ## Status of a module plus human-readable reasons when the status is
+  ## Error: which items are missing or unverifiable, or what config problem
+  ## (cycle, unknown dependency, broken spec file) was found. Reasons are
+  ## empty for Installed and NotInstalled.
   var total, installed = 0
+  var missing, unverifiable: seq[string]
   var done, pending: seq[string]
 
-  proc visit(res: ResolvedModule) {.raises: [ModuleError, PackageError, ServiceError, IOError, OSError].} =
+  proc visit(res: ResolvedModule) {.raises: [ModuleError, PackageError, ServiceError, SymlinkError, IOError, OSError].} =
     let m = res.module
     if m.name in done:
       return # count each module once, even with diamond dependencies
@@ -148,18 +162,31 @@ proc status*(reg: ModuleRegistery, moduleName: string): ModuleStatus =
         "Dependency cycle detected at module: " & m.name)
     pending.add m.name
     try:
-      let dir = res.parentDir
-      for path in packageFiles(dir / m.name):
+      let dir = res.parentDir / m.name
+      for path in packageFiles(dir):
         for spec in loadSpecFile(path):
           inc total
-          if spec.isInstalled():
-            inc installed
-      for svc in loadServices(dir / m.name):
+          let item = m.name & ": package '" & spec.name & "' [" & $spec.source & "]"
+          try:
+            if spec.isInstalled(): inc installed
+            else: missing.add item & " is not installed"
+          except PackageError as e:
+            unverifiable.add item & " cannot be verified: " & e.msg
+      for svc in loadServices(dir):
         inc total
-        if svc.isInstalled():
-          inc installed
+        let item = m.name & ": unit '" & svc.unitName & "'"
+        try:
+          if svc.isInstalled(): inc installed
+          else: missing.add item & " is not installed, enabled or running"
+        except ServiceError as e:
+          unverifiable.add item & " cannot be verified: " & e.msg
+      for spec in symlinkSpecs(dir, reg.moduleDir):
+        inc total
+        let item = m.name & ": symlink '" & spec.dest & "'"
+        if spec.isInstalled(): inc installed
+        else: missing.add item & " is not installed"
       for sub in m.subModules:
-        visit(ResolvedModule(found: true, module: sub, parentDir: dir / m.name))
+        visit(ResolvedModule(found: true, module: sub, parentDir: dir))
       for dep in m.dependencies:
         let r = reg.findModule(dep)
         if not r.found:
@@ -173,13 +200,19 @@ proc status*(reg: ModuleRegistery, moduleName: string): ModuleStatus =
   try:
     let res = reg.findModule(moduleName)
     if not res.found:
-      return Error
+      return (Error, @["Unknown module: " & moduleName])
     visit(res)
-  except CatchableError:
-    return Error
+  except CatchableError as e:
+    return (Error, @[e.msg])
   if installed == total:
-    Installed
+    (Installed, @[])
+  elif installed == 0 and unverifiable.len > 0:
+    # Nothing could be confirmed; too risky to claim NotInstalled.
+    (Error, unverifiable)
   elif installed == 0:
-    NotInstalled
+    (NotInstalled, @[])
   else:
-    Error # partially installed
+    (Error, missing & unverifiable) # partially installed
+
+proc status*(reg: ModuleRegistery, moduleName: string): ModuleStatus =
+  reg.statusDetail(moduleName)[0]

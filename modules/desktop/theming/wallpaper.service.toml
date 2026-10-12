@@ -1,10 +1,22 @@
 [Unit]
 Description=awww wallpaper daemon
+# Starts with the sway session, not at login: the daemon needs a live
+# Wayland compositor.
+PartOf=sway-session.target
+After=sway-session.target
 
 [Service]
 Type=exec
+# WAYLAND_DISPLAY is imported into the user environment by sway itself
+# (import-environment in appearance.conf). XDG_RUNTIME_DIR is set by the user
+# manager.
 Environment=XDG_BACKEND=wayland
 ExecStart=/usr/bin/awww-daemon
+# The socket appears shortly after exec; give it a beat before restoring,
+# as the old sway exec_always did.
 ExecStartPost=/usr/bin/env sh -c 'sleep 1; exec awww restore'
 Restart=on-failure
 RestartSec=2
+
+[Install]
+WantedBy=sway-session.target
