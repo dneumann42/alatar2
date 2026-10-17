@@ -1,7 +1,7 @@
 import std/[os, strutils, sequtils]
 import terminal
 
-import alatar/[modules, packages, repos, services, symlinks]
+import alatar/[fs, modules, packages, repos, services, symlinks]
 
 import cligen
 
@@ -46,7 +46,8 @@ proc cmdInstall(names: seq[string], dir = defaultModulesDir()) =
   ## module's dependencies - including dependencies of its submodules - are
   ## installed first, in dependency order. Bootstrap packages (before = true)
   ## go through pacman / git+makepkg; everything else through paru and flatpak.
-  ## Entries in a module's symlink.toml are linked last, before its units.
+  ## Entries in a module's fs.toml are created (missing dirs/files only) before
+  ## its symlink.toml entries are linked, which in turn come before its units.
   let reg = loadRegistry(dir)
   defer: stopSudoAuthKeepAlive()
   var targets = names
@@ -65,7 +66,8 @@ proc cmdInstall(names: seq[string], dir = defaultModulesDir()) =
 proc cmdUninstall(names: seq[string], dir = defaultModulesDir()) =
   ## Stop and remove a module's systemd user units, symlinks and packages
   ## (submodules included). Modules that this one merely depends on are
-  ## left alone; other modules may still use them.
+  ## left alone; other modules may still use them. fs.toml entries are kept:
+  ## they hold user data, alatar only seeds them.
   if names.len != 1:
     quit "alatar: uninstall expects exactly one module name", 2
   let name = names[0]
@@ -172,6 +174,14 @@ proc cmdInfo(names: seq[string], dir = defaultModulesDir()) =
         except ServiceError:
           paint(2, "unknown")
       echo indent, "  ", state, "  unit: ", svc.unitName
+    let entries =
+      try:
+        fsSpecs(mdir)
+      except CatchableError:
+        @[]
+    for spec in entries:
+      echo indent, "  ", mark spec.isInstalled(),
+        (if spec.kind == fsDirectory: "  dir:  " else: "  file: "), spec.path
     let links =
       try:
         symlinkSpecs(mdir, reg.moduleDir)

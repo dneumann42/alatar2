@@ -1,6 +1,6 @@
 import std/[os, strutils, sequtils]
 
-import alatar/[packages, repos, services, symlinks]
+import alatar/[fs, packages, repos, services, symlinks]
 
 type
   ModuleStatus* = enum Installed, Error, NotInstalled
@@ -65,17 +65,21 @@ proc packageFiles(dir: string): seq[string] {.raises: [OSError].} =
       result.add path
 
 proc installOwn*(module: Module, dir, modulesRoot: string): seq[ServiceSpec] {.
-    raises: [PackageError, RepoError, ServiceError, SymlinkError,
+    raises: [PackageError, RepoError, FsError, ServiceError, SymlinkError,
              IOError, OSError].} =
-  ## Installs only this module's own repositories, packages, symlinks and
-  ## units; no dependency or submodule resolution (use the registry procs for
-  ## that). Returns the session-bound units, which the caller starts once the
-  ## whole module tree is in place (see `startSessionUnits`).
+  ## Installs only this module's own repositories, packages, filesystem
+  ## entries, symlinks and units; no dependency or submodule resolution (use
+  ## the registry procs for that). Returns the session-bound units, which the
+  ## caller starts once the whole module tree is in place (see
+  ## `startSessionUnits`).
   # Repositories before packages: a package listed below can live in one of
   # them (steam needs [multilib], which archinstall leaves disabled).
   ensureRepos(loadRepos(dir))
   for path in packageFiles(dir):
     installAll(loadSpecFile(path))
+  # Directories and files before symlinks and units: a link destination or a
+  # unit's state path can live under a directory fs.toml creates.
+  installFs(fsSpecs(dir))
   # Config symlinks before units: a unit may exec a script that only exists
   # once it is linked into place.
   installSymlinks(symlinkSpecs(dir, modulesRoot))
@@ -84,7 +88,7 @@ proc installOwn*(module: Module, dir, modulesRoot: string): seq[ServiceSpec] {.
 
 proc installTree(module: Module, moduleDir, modulesRoot: string,
                  sessionUnits: var seq[ServiceSpec]) {.
-    raises: [PackageError, RepoError, ServiceError, SymlinkError,
+    raises: [PackageError, RepoError, FsError, ServiceError, SymlinkError,
              IOError, OSError].} =
   let dir = moduleDir / module.name
   # Parent before children: a submodule's unit can need a package this module
@@ -95,7 +99,7 @@ proc installTree(module: Module, moduleDir, modulesRoot: string,
     installTree(subModule, dir, modulesRoot, sessionUnits)
 
 proc install*(module: Module, moduleDir, modulesRoot: string) {.
-    raises: [PackageError, RepoError, ServiceError, SymlinkError,
+    raises: [PackageError, RepoError, FsError, ServiceError, SymlinkError,
              IOError, OSError].} =
   ## Tree install without dependency resolution. Modules listed in
   ## `dependencies` files are NOT installed here; prefer
@@ -158,7 +162,8 @@ proc uninstall*(module: Module, moduleDir, modulesRoot: string) {.
   # Reverse of install: submodules first (their units depend on this module's
   # packages and target), then this module's units, symlinks and packages.
   # Dependencies (other modules) are intentionally left alone; they may still
-  # be in use.
+  # be in use. fs.toml entries are left alone too - directories and files hold
+  # user data, alatar only ever seeds them.
   for subModule in module.subModules:
     subModule.uninstall(dir, modulesRoot)
   uninstallServices(loadServices(dir))
@@ -185,7 +190,7 @@ proc statusDetail*(reg: ModuleRegistery, moduleName: string): (ModuleStatus, seq
   var done, pending: seq[string]
 
   proc visit(res: ResolvedModule) {.raises: [ModuleError, PackageError, RepoError,
-      ServiceError, SymlinkError, IOError, OSError].} =
+      FsError, ServiceError, SymlinkError, IOError, OSError].} =
     let m = res.module
     if m.name in done:
       return # count each module once, even with diamond dependencies
@@ -212,6 +217,12 @@ proc statusDetail*(reg: ModuleRegistery, moduleName: string): (ModuleStatus, seq
             else: missing.add item & " is not installed"
           except PackageError as e:
             unverifiable.add item & " cannot be verified: " & e.msg
+      for spec in fsSpecs(dir):
+        inc total
+        let item = m.name & (if spec.kind == fsDirectory: ": directory '"
+                             else: ": file '") & spec.path & "'"
+        if spec.isInstalled(): inc installed
+        else: missing.add item & " does not exist"
       for svc in loadServices(dir):
         inc total
         let item = m.name & ": unit '" & svc.unitName & "'"

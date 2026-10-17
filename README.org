@@ -32,8 +32,11 @@ Bootstrap contract:
   files.
 - Within a module: repositories first (=repos.toml=, so a package listed later
   can live in one of them), then packages (=before = true= entries via pacman /
-  git+makepkg, everything else via paru and flatpak), then config symlinks,
-  then units - and all of that before its submodules, so a child can rely on
+  git+makepkg, everything else via paru and flatpak), then filesystem entries
+  (=fs.toml=, =[[directory]]=/=[[file]]= tables with =path= and optional
+  =content=: created when missing, never overwritten or deleted, paths expand
+  =~= and =$VAR=), then config symlinks, then units - and all of that before
+  its submodules, so a child can rely on
   a binary or a target the parent provides (awww <->
   desktop/theming/wallpaper.service, sway-session.target <-> the session
   services bound to it). Submodules install in the same order, recursively.
