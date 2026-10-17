@@ -1,4 +1,4 @@
-import std/[os, osproc, strutils, sugar, posix]
+import std/[os, osproc, strutils, sugar, posix, terminal]
 
 import parsetoml
 
@@ -76,19 +76,92 @@ proc checkCmd(cmd: string, args: seq[string], workingDir = "") {.raises: [Packag
   if exitCode != 0:
     raise newException(PackageError, "'" & cmd & " " & args.join(" ") & "' failed with exit code " & $exitCode)
 
-proc runPrivileged(cmd: string, args: seq[string]) {.raises: [PackageError].} =
-  # Elevate through pkexec unless we already are root.
+var
+  elevationTool = "" # memoised privilegedHelper() result; "none" when neither exists
+  sudoAuthKeepAlive: Process # nil unless the keep-alive loop is running
+
+proc hasExe(name: string): bool =
+  ## findExe raises when the environment cannot be read; for a presence
+  ## check "unknown" simply means "not usable as an option".
+  try: findExe(name).len > 0 except OSError: false
+
+proc privilegedHelper(): string {.raises: [PackageError].} =
+  ## The tool alatar escalates through: "sudo" or "pkexec".
+  ##
+  ## sudo wins whenever we have a terminal to prompt on: sudo caches
+  ## credentials per tty (timestamp_type default), so the password typed
+  ## once covers every later sudo call in the run - including the ones
+  ## paru makes internally. pkexec re-opens a polkit agent dialog on every
+  ## invocation, which is exactly the repeated prompting we want to avoid.
+  ## pkexec is the fallback when sudo is missing or there is no terminal
+  ## (alatar launched from a GUI), where the agent dialog is the only way
+  ## to ask for a password.
+  if elevationTool.len > 0:
+    if elevationTool == "none":
+      raise newException(PackageError,
+        "No way to run commands as root: neither sudo nor pkexec found")
+    return elevationTool
+  let
+    haveSudo = hasExe("sudo")
+    havePkexec = hasExe("pkexec")
+  result =
+    if haveSudo and isatty(stdin): "sudo"
+    elif havePkexec: "pkexec"
+    elif haveSudo: "sudo"
+    else: ""
+  if result.len == 0:
+    elevationTool = "none"
+    raise newException(PackageError,
+      "No way to run commands as root: neither sudo nor pkexec found")
+  elevationTool = result
+
+proc ensureSudoAuth() {.raises: [PackageError].} =
+  ## Ask for the sudo password once up front, then keep the timestamp alive
+  ## in the background for the rest of the run. Without the keep-alive,
+  ## sudo's five-minute cache lapses in the middle of a long AUR build and
+  ## the password has to be typed again. The loop renews the timestamp every
+  ## minute while alatar lives (kill -0 $PPID) and ends on its own as soon
+  ## as sudo stops honouring the cache, so a crashed alatar never leaves a
+  ## permanently warm sudo behind.
+  checkCmd("sudo", @["-v"])
+  if sudoAuthKeepAlive.isNil:
+    try:
+      sudoAuthKeepAlive = startProcess(
+        command = "sh",
+        args = @["-c", "while kill -0 $PPID 2>/dev/null && " &
+          "sudo -n true >/dev/null 2>&1; do sleep 60; done"],
+        options = {poUsePath})
+    except OSError, IOError:
+      raise newException(PackageError,
+        "Failed to start the sudo keep-alive loop: " & getCurrentExceptionMsg())
+
+proc stopSudoAuthKeepAlive*() =
+  ## Ends the keep-alive loop (see ensureSudoAuth). The sudo timestamp
+  ## itself is left in place, just as a normal sudo session would.
+  if not sudoAuthKeepAlive.isNil:
+    sudoAuthKeepAlive.terminate()
+    close(sudoAuthKeepAlive)
+    sudoAuthKeepAlive = nil
+
+proc runPrivileged*(cmd: string, args: seq[string]) {.raises: [PackageError].} =
+  # Elevate through the sudo/pkexec helper unless we already are root. Fresh
+  # installs may not have polkit yet (it is itself installed by a module),
+  # but sudo comes in from setup either way, and privilegedHelper reports a
+  # clear error if neither tool is around.
   if geteuid() == 0:
     checkCmd(cmd, args)
-  else:
-    let exe =
-      try:
-        findExe(cmd)
-      except OSError as e:
-        raise newException(PackageError, "Required program not found: " & cmd, e)
-    if exe.len == 0:
-      raise newException(PackageError, "Required program not found: " & cmd)
-    checkCmd("pkexec", @[exe] & args)
+    return
+  let exe =
+    try:
+      findExe(cmd)
+    except OSError as e:
+      raise newException(PackageError, "Required program not found: " & cmd, e)
+  if exe.len == 0:
+    raise newException(PackageError, "Required program not found: " & cmd)
+  let helper = privilegedHelper()
+  if helper == "sudo":
+    ensureSudoAuth()
+  checkCmd(helper, @[exe] & args)
 
 proc installAurFromSource(name: string) {.raises: [PackageError].} =
   # Bootstrap path for AUR packages marked before = true: paru may not be
@@ -123,6 +196,13 @@ proc isInstalled*(pkg: PackageSpec): bool {.raises: [PackageError].} =
     # 'flatpak info <id>' exits 0 only when the app/runtime is present.
     runCmd("flatpak", @["info", pkg.name], quiet = true) == 0
 
+proc ensureFlathub() {.raises: [PackageError].} =
+  # Fresh systems have no flatpak remotes; installs name the flathub remote
+  # explicitly, so add it once (idempotent) before the first install.
+  runPrivileged("flatpak",
+    @["remote-add", "--if-not-exists", "flathub",
+      "https://flathub.org/repo/flathub.flatpakrepo"])
+
 proc install*(pkg: PackageSpec) {.raises: [PackageError].} =
   ## Installs the package unless it is already present (see isInstalled).
   ## The makepkg path especially needs this: pacman -U would otherwise
@@ -134,13 +214,14 @@ proc install*(pkg: PackageSpec) {.raises: [PackageError].} =
     if pkg.before:
       runPrivileged("pacman", @["-S", "--needed", "--noconfirm", "--", pkg.name])
     else:
-      checkCmd("paru", @["-S", "--needed", "--noconfirm", "--", pkg.name])
+      checkCmd("paru", @["-S", "--needed", "--noconfirm", "--skipreview", "--noprovides", "--useask", "--assume-installed", "scenefx0.5", "--assume-installed", "mopidy=4.0.0", "--", pkg.name])
   of aur:
     if pkg.before:
       installAurFromSource(pkg.name)
     else:
-      checkCmd("paru", @["-S", "--needed", "--noconfirm", pkg.name])
+      checkCmd("paru", @["-S", "--needed", "--noconfirm", "--skipreview", "--noprovides", "--useask", "--assume-installed", "scenefx0.5", "--assume-installed", "mopidy=4.0.0", "--", pkg.name])
   of flatpak:
+    ensureFlathub()
     runPrivileged("flatpak", @["install", "-y", "flathub", pkg.name])
 
 proc installAll*(specs: seq[PackageSpec]) {.raises: [PackageError].} =
@@ -179,8 +260,9 @@ proc installAll*(specs: seq[PackageSpec]) {.raises: [PackageError].} =
   for name in aurBootPkgs:
     step installAurFromSource(name)
   if paruPkgs.len > 0:
-    step checkCmd("paru", @["-S", "--needed", "--noconfirm", "--"] & paruPkgs)
+    step checkCmd("paru", @["-S", "--needed", "--noconfirm", "--skipreview", "--noprovides", "--useask", "--assume-installed", "scenefx0.5", "--assume-installed", "mopidy=4.0.0", "--"] & paruPkgs)
   if flatpakPkgs.len > 0:
+    step ensureFlathub()
     step runPrivileged("flatpak", @["install", "-y", "flathub"] & flatpakPkgs)
 
   if failures.len > 0:

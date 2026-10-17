@@ -9,6 +9,11 @@ source = "aur"
 tags = ["compositor", "wayland"]
 
 [[package]]
+name = "scenefx"
+source = "arch"
+tags = ["wayland", "libs"]
+
+[[package]]
 name = "xdg-desktop-portal-wlr"
 source = "arch"
 tags = ["wayland", "system"]
@@ -80,10 +85,7 @@ name = "wallust-git"
 source = "aur"
 tags = ["wayland", "theming"]
 
-[[package]]
-name = "awww"
-source = "arch"
-tags = ["wayland", "media"]
+# awww is declared in the theming submodule, which owns wallpaper.service.
 
 [[package]]
 name = "lxqt-policykit"
@@ -115,10 +117,8 @@ name = "tmux"
 source = "arch"
 tags = ["terminal", "shell"]
 
-[[package]]
-name = "emacs"
-source = "arch"
-tags = ["editor"]
+# emacs is owned by the emacs module (it installs emacs-wayland, which
+# Conflicts= emacs - declaring it in two places breaks the install order).
 
 [[package]]
 name = "zed"
@@ -169,11 +169,6 @@ tags = ["libs", "gaming"]
 name = "sdl3_ttf"
 source = "arch"
 tags = ["libs", "gaming"]
-
-[[package]]
-name = "pcre"
-source = "arch"
-tags = ["libs"]
 
 [[package]]
 name = "waterfox-bin"
@@ -590,20 +585,20 @@ name = "ttf-nerd-fonts-symbols-mono"
 source = "arch"
 tags = ["fonts"]
 
-[[package]]
-name = "com.moonlight_stream.Moonlight"
-source = "flatpak"
-tags = ["gaming", "streaming"]
+# [[package]]
+# name = "com.moonlight_stream.Moonlight"
+# source = "flatpak"
+# tags = ["gaming", "streaming"]
+# 
+# [[package]]
+# name = "dev.lizardbyte.app.Sunshine"
+# source = "flatpak"
+# tags = ["gaming", "streaming"]
 
-[[package]]
-name = "dev.lizardbyte.app.Sunshine"
-source = "flatpak"
-tags = ["gaming", "streaming"]
-
-[[package]]
-name = "io.lmms.LMMS"
-source = "flatpak"
-tags = ["music", "creative"]
+# [[package]]
+# name = "io.lmms.LMMS"
+# source = "flatpak"
+# tags = ["music", "creative"]
 
 [[package]]
 name = "org.gnome.Boxes"

@@ -3,7 +3,9 @@ name = "wallust-git"
 source = "aur"
 tags = ["desktop", "theming"]
 
+# This module owns wallpaper.service, so the awww daemon it runs is declared
+# here: a module's own packages are installed before its own units.
 [[package]]
 name = "awww"
-source = "aur"
-tags = ["desktop", "theming"]
+source = "arch"
+tags = ["desktop", "theming", "wayland"]

@@ -1,13 +1,17 @@
 import std/[os, strutils]
 
 import parsetoml
-import re
+# Pure-Nim regex engine: std/re dlopens libpcre at program start, which would
+# make alatar itself unrunnable on a fresh system before any module (with pcre)
+# had a chance to install it.
+import regex
 import std/syncio
 
 type
   SymlinkSpec* = object
-    key*: string    ## table name in symlink.toml: a regex (ERE) matched
-                    ## against paths relative to the modules root
+    key*: string    ## table name in symlink.toml: a regex (ERE syntax,
+                    ## pure-Nim engine) matched against paths relative
+                    ## to the modules root
     source*: string ## resolved absolute path the link points at
     dest*: string   ## absolute path of the link itself, env vars expanded
 
@@ -86,8 +90,9 @@ proc substituteCaptures(s: string, caps: openArray[string]): string =
 proc loadSymlinkFile*(path, modulesRoot: string): seq[SymlinkSpec] {.
     raises: [IOError, SymlinkError, OSError].} =
   ## Reads a module's `symlink.toml`. Each table is named by a regular
-  ## expression (PCRE) matched against paths relative to the modules root -
-  ## quote keys containing `/`. Plain paths work as literals. The pattern is
+  ## expression (ERE-like syntax, matched by the pure-Nim regex engine, so
+  ## alatar needs no system pcre) against paths relative to the modules root
+  ## - quote keys containing `/`. Plain paths work as literals. The pattern is
   ## matched against the direct entries of its longest metacharacter-free
   ## directory prefix, so `desktop/_config/(.*)` links each config dir below
   ## `desktop/_config` individually. Every entry needs a string field `to`:
@@ -108,7 +113,7 @@ proc loadSymlinkFile*(path, modulesRoot: string): seq[SymlinkSpec] {.
         "Symlink entry '" & key & "' in '" & path & "' needs a string field 'to'")
     let rx =
       try:
-        re(key)
+        re2(key)
       except CatchableError as e:
         raise newException(SymlinkError,
           "Invalid regex in symlink entry '" & key & "': " & e.msg)
@@ -123,14 +128,18 @@ proc loadSymlinkFile*(path, modulesRoot: string): seq[SymlinkSpec] {.
         continue
       let name = found.lastPathPart
       let relPath = if base.len > 0: base / name else: name
-      var caps = newSeq[string](10)
-      # Anchored full match: matched at 0 and spanning the whole path.
-      # `matchLen` yields captures in caps[0] = group 1; $0 is the whole path.
-      if relPath.matchLen(rx, caps) == relPath.len:
+      var m: RegexMatch2
+      # Whole-string match: anchored at 0 and spanning the whole path.
+      # m.captures holds the group slices ($1..); $0 is the whole path.
+      if relPath.match(rx, m):
         inc matched
-        var groups = newSeq[string](caps.len + 1)
+        var groups = newSeq[string](m.captures.len + 1)
         groups[0] = relPath
-        for ci in 0 ..< caps.len: groups[ci + 1] = caps[ci]
+        for ci in 0 ..< m.captures.len:
+          # nonCapture (-1 .. -2): the group did not participate, counts
+          # as an empty capture, like with std/re.
+          let bounds = m.captures[ci]
+          groups[ci + 1] = if bounds.a >= 0: relPath[bounds] else: ""
         let dest = substituteCaptures(expandVars(to.getStr()), groups)
         if not dest.isAbsolute():
           raise newException(SymlinkError, "Symlink destination for '" & key &

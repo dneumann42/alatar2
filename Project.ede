@@ -1,0 +1,10 @@
+;; Object Alatar
+;; EDE Project Files are auto generated: Do Not Edit
+(ede-proj-project "Alatar"
+  :file "Project.ede"
+  :name "Alatar"
+  :targets nil
+  :configurations '("debug" "release")
+  :object-name "Alatar"
+  :makefile-type Makefile
+  :configuration-variables '("debug" (("DEBUG" . "1"))))

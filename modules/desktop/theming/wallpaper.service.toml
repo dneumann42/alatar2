@@ -1,20 +1,36 @@
 [Unit]
 Description=awww wallpaper daemon
-# Starts with the sway session, not at login: the daemon needs a live
-# Wayland compositor.
+# Session service, not a login service: the daemon needs a live Wayland
+# compositor. sway-session.target is activated by sway itself, after
+# WAYLAND_DISPLAY has been published to the user manager, and this unit is
+# pulled in through WantedBy below.
 PartOf=sway-session.target
 After=sway-session.target
+# Refuse to start when no compositor is around to talk to: without this the
+# daemon dies at once and Restart= loops against the unit. A failed condition
+# leaves the unit cleanly inactive, so `alatar install` from a TTY (or a plain
+# `systemctl --user start` outside sway) is a silent no-op.
+ConditionEnvironment=WAYLAND_DISPLAY
+# Same protection for the compositor-dies-underneath case: give up instead of
+# restarting forever.
+StartLimitBurst=5
+StartLimitIntervalSec=30
 
 [Service]
 Type=exec
-# WAYLAND_DISPLAY is imported into the user environment by sway itself
-# (import-environment in appearance.conf). XDG_RUNTIME_DIR is set by the user
-# manager.
+# WAYLAND_DISPLAY comes from the user manager environment, which sway publishes
+# (scripts/start-session-services.sh); XDG_RUNTIME_DIR is set by the manager.
 Environment=XDG_BACKEND=wayland
+# awww caches the last image under $XDG_CACHE_HOME/awww and only warns when the
+# directory is missing - without it there is nothing for `awww restore` to find,
+# so every session would fall back to the default picture instead of the one
+# the user picked.
+ExecStartPre=-/usr/bin/env sh -c 'mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/awww"'
 ExecStart=/usr/bin/awww-daemon
-# The socket appears shortly after exec; give it a beat before restoring,
-# as the old sway exec_always did.
-ExecStartPost=/usr/bin/env sh -c 'sleep 1; exec awww restore'
+# Put a wallpaper on screen: the image awww cached, else a picture from
+# $WALLPAPERS_DIR, else the theme background color. Waits for the daemon socket
+# itself, so no sleep. '-' so a missing picture can never fail the unit.
+ExecStartPost=-/usr/bin/sh -c 'exec "${XDG_CONFIG_HOME:-$HOME/.config}/sway/scripts/apply-wallpaper.sh"'
 Restart=on-failure
 RestartSec=2
 

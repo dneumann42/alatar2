@@ -5,6 +5,16 @@ then the services are installed and enabled.
 
 parent packages.toml are resolved before the children
 
+repos.toml files declare pacman repositories the module needs. Each
+=[[repo]]= table has a =name= (the [section] to enable) and optionally
+=include= (default =/etc/pacman.d/mirrorlist=) or an explicit =server=.
+Enabling edits /etc/pacman.conf through sudo/pkexec, keeps the untouched copy
+as =/etc/pacman.conf.alatar= on first use, and refreshes the databases, so
+packages from those repos are installable in the same run. It is one-way:
+removing an entry never edits pacman.conf back, because installed packages may
+come from that repo. =ALATAR_PACMAN_CONF= points the logic at another file,
+which is how the patching is tested without root.
+
 symlink.toml files map config sources to their destinations: each table is
 named by a regex (plain paths work) matched against paths relative to the
 modules root - quote keys with `/`. The pattern is applied to the direct
@@ -15,3 +25,31 @@ Installing links them ($VAR and XDG defaults are expanded), uninstalling
 removes the links; a real file or directory in the way triggers a y/n
 replace prompt. Directories starting with `_` (like `desktop/_config`) are
 the module's own files, never submodules.
+
+Bootstrap contract:
+
+- A module's =dependencies= file lists modules installed fully before its own
+  files.
+- Within a module: repositories first (=repos.toml=, so a package listed later
+  can live in one of them), then packages (=before = true= entries via pacman /
+  git+makepkg, everything else via paru and flatpak), then config symlinks,
+  then units - and all of that before its submodules, so a child can rely on
+  a binary or a target the parent provides (awww <->
+  desktop/theming/wallpaper.service, sway-session.target <-> the session
+  services bound to it). Submodules install in the same order, recursively.
+- =core= depends on the =pacman= module, whose repos.toml enables
+  =[multilib]=: the base image of every module can then reach 32-bit packages
+  (steam) without anyone editing /etc/pacman.conf by hand.
+- Units bound to a =*-session.target= are only *enabled*; alatar starts them
+  when a compositor is already up (WAYLAND_DISPLAY published to the user
+  manager and its socket present), never from a TTY or SSH. sway activates
+  the target itself (=scripts/start-session-services.sh=), so a wallpaper
+  agent is not started before there is a Wayland session to draw into.
+- Runtime libraries that binaries dlopen at startup belong in core with
+  =before = true= so dependency order guarantees they exist before anything
+  runs. Note the PCRE1 trap: std/re tries =libpcre.so.3= *before*
+  =libpcre.so.1=, so a =libpcre.so.3= symlink to pcre2 makes every std/re
+  binary die with "could not import: pcre_exec" even with pcre installed.
+  Both alatar and the statusbar therefore use the pure-Nim regex engine /
+  plain string parsing and never dlopen pcre; alatar must run on a bare
+  system, before any module has installed anything.

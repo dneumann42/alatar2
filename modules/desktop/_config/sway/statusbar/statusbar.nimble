@@ -9,9 +9,12 @@ srcDir        = "src"
 bin           = @["statusbar", "barbuttons"]
 binDir        = "bin"
 
-# Stdlib only for statusbar (os, osproc, strutils, times, json, re, math).
+# Stdlib only for statusbar (os, osproc, strutils, times, json, math) - and
+# deliberately NOT std/re: it dlopens libpcre.so(.3|.1|) at startup, which
+# breaks the bar whenever PCRE1 is missing or shadowed (see the bootstrap
+# contract in README.org). Numeric parsing lives in src/statusbar/util.nim.
 # bar-buttons adds parsetoml (buttons.toml) and dlopen'ed GTK4/
-# gtk4-layer-shell symbols (src/statusbar/layershell.nim — no link flags).
+# gtk4-layer-shell symbols (src/statusbar/layershell.nim - no link flags).
 requires "nim >= 2.0.0"
 requires "parsetoml >= 0.7.0"
 

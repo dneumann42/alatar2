@@ -1,4 +1,6 @@
 --noNimblePath
 --path:"/home/dneumann/.nimble/pkgs2/cligen-1.11.0-7ab5190b7ea21aab752bcd03f2ca2b71b048ec4f"
+--path:"/home/dneumann/.alatar/src"
+--path:"/home/dneumann/.nimble/pkgs2/regex-0.27.0-30f7499a12c2a25a58591a4ace638afc843b37e0"
 --path:"/home/dneumann/.nimble/pkgs2/parsetoml-0.7.2-2a9fb57ef1f6460fd61b1cfab2d83af44f788a25"
---path:"/home/dneumann/.alatar2/src"
+--path:"/home/dneumann/.nimble/pkgs2/unicodedb-0.14.1-a9dc8cfd3c0546957d1a99d2c6ace8fc5034f330"

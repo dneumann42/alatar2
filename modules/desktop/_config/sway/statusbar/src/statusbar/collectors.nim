@@ -4,7 +4,7 @@
 # every second (slower sources are polled on their own intervals).
 # ============================================================================
 
-import std/[os, strutils, times, re, algorithm, math]
+import std/[os, strutils, times, algorithm, math]
 import std/unicode except splitWhitespace
 import ./util
 
@@ -79,13 +79,9 @@ proc gpuStats*(): (string, string) =
     let outp = sh("nvidia-smi",
                   "--query-gpu=temperature.gpu,utilization.gpu",
                   "--format=csv,noheader,nounits")
-    var mm: array[2, string]
-    if find(outp, re"(\d+)\s*,\s*(\d+)", mm) >= 0:
-      gpuTempCache = mm[0]
-      gpuUtilCache = mm[1]
-    else:
-      gpuTempCache = ""
-      gpuUtilCache = ""
+    let (temp, usage) = csvIntPair(outp)
+    gpuTempCache = temp
+    gpuUtilCache = usage
     gpuTs = now
   (gpuTempCache, gpuUtilCache)
 
@@ -130,10 +126,7 @@ proc volState*(): (bool, string) =
   ## Returns (muted, pct); pct is "" when no sink exists.
   # pulse outputs "Muted: yes"; pipewire's pactl wrapper says "Mute: yes"
   let muted = sh("pactl", "get-sink-mute", "@DEFAULT_SINK@").endsWith("yes")
-  var pct = ""
-  var mm: array[1, string]
-  if find(sh("pactl", "get-sink-volume", "@DEFAULT_SINK@"), re"(\d+)%", mm) >= 0:
-    pct = mm[0]
+  let pct = percentValue(sh("pactl", "get-sink-volume", "@DEFAULT_SINK@"))
   (muted, pct)
 
 proc mediaState*(): (bool, bool, string) =

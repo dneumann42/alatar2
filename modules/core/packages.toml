@@ -9,11 +9,12 @@ name = "git"
 source = "arch"
 before = true
 tags = ["dev", "vcs"]
-[[package]]
-name = "gnome-keyring"
-source = "arch"
-before = true
-tags = ["system", "secrets"]
+
+# [[package]]
+# name = "gnome-keyring"
+# source = "arch"
+# before = true
+# tags = ["system", "secrets"]
 
 [[package]]
 name = "paru"
@@ -26,3 +27,9 @@ name = "flatpak"
 source = "arch"
 before = true
 tags = ["system", "packaging"]
+
+[[package]]
+name = "pcre"
+source = "arch"
+before = true
+tags = ["libs", "runtime"]

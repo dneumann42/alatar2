@@ -1,7 +1,7 @@
 import std/[os, strutils, sequtils]
 import terminal
 
-import alatar/[modules, packages, services, symlinks]
+import alatar/[modules, packages, repos, services, symlinks]
 
 import cligen
 
@@ -48,6 +48,7 @@ proc cmdInstall(names: seq[string], dir = defaultModulesDir()) =
   ## go through pacman / git+makepkg; everything else through paru and flatpak.
   ## Entries in a module's symlink.toml are linked last, before its units.
   let reg = loadRegistry(dir)
+  defer: stopSudoAuthKeepAlive()
   var targets = names
   if "all" in targets:
     targets = targets.filterIt(it != "all")
@@ -69,6 +70,7 @@ proc cmdUninstall(names: seq[string], dir = defaultModulesDir()) =
     quit "alatar: uninstall expects exactly one module name", 2
   let name = names[0]
   let reg = loadRegistry(dir)
+  defer: stopSudoAuthKeepAlive()
   try:
     reg.uninstall(name)
     echo "uninstalled ", name, "."
@@ -143,6 +145,16 @@ proc cmdInfo(names: seq[string], dir = defaultModulesDir()) =
     if m.dependencies.len > 0:
       echo indent, "  depends on: ", m.dependencies.join(", ")
     let mdir = parentDir / m.name
+    try:
+      for repo in loadRepos(mdir):
+        let state =
+          try:
+            mark repo.isInstalled()
+          except RepoError:
+            paint(2, "unknown")
+        echo indent, "  ", state, "  repo ", repo.name, " [pacman.conf]"
+    except IOError, RepoError:
+      discard
     let specPath = mdir / "packages.toml"
     if fileExists(specPath):
       for spec in loadSpecFile(specPath):

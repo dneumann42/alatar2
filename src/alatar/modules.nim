@@ -1,6 +1,6 @@
 import std/[os, strutils, sequtils]
 
-import alatar/[packages, services, symlinks]
+import alatar/[packages, repos, services, symlinks]
 
 type
   ModuleStatus* = enum Installed, Error, NotInstalled
@@ -64,28 +64,49 @@ proc packageFiles(dir: string): seq[string] {.raises: [OSError].} =
     if path.endsWith("packages.toml"):
       result.add path
 
-proc installOwn*(module: Module, dir, modulesRoot: string) {.
-    raises: [PackageError, ServiceError, SymlinkError, IOError, OSError].} =
-  ## Installs only this module's own packages, symlinks and units; no
-  ## dependency or submodule resolution (use the registry procs for that).
+proc installOwn*(module: Module, dir, modulesRoot: string): seq[ServiceSpec] {.
+    raises: [PackageError, RepoError, ServiceError, SymlinkError,
+             IOError, OSError].} =
+  ## Installs only this module's own repositories, packages, symlinks and
+  ## units; no dependency or submodule resolution (use the registry procs for
+  ## that). Returns the session-bound units, which the caller starts once the
+  ## whole module tree is in place (see `startSessionUnits`).
+  # Repositories before packages: a package listed below can live in one of
+  # them (steam needs [multilib], which archinstall leaves disabled).
+  ensureRepos(loadRepos(dir))
   for path in packageFiles(dir):
     installAll(loadSpecFile(path))
+  # Config symlinks before units: a unit may exec a script that only exists
+  # once it is linked into place.
   installSymlinks(symlinkSpecs(dir, modulesRoot))
   # Units need their packages, so services come last.
-  installServices(loadServices(dir))
+  result = installServices(loadServices(dir))
+
+proc installTree(module: Module, moduleDir, modulesRoot: string,
+                 sessionUnits: var seq[ServiceSpec]) {.
+    raises: [PackageError, RepoError, ServiceError, SymlinkError,
+             IOError, OSError].} =
+  let dir = moduleDir / module.name
+  # Parent before children: a submodule's unit can need a package this module
+  # installs (awww <-> theming/wallpaper.service) or bind to a target defined
+  # here (sway-session.target <-> the session services below it).
+  sessionUnits.add module.installOwn(dir, modulesRoot)
+  for subModule in module.subModules:
+    installTree(subModule, dir, modulesRoot, sessionUnits)
 
 proc install*(module: Module, moduleDir, modulesRoot: string) {.
-    raises: [PackageError, ServiceError, SymlinkError, IOError, OSError].} =
+    raises: [PackageError, RepoError, ServiceError, SymlinkError,
+             IOError, OSError].} =
   ## Tree install without dependency resolution. Modules listed in
   ## `dependencies` files are NOT installed here; prefer
   ## `install*(reg: ModuleRegistery, ...)`, which resolves them.
-  let dir = moduleDir / module.name
-  for subModule in module.subModules:
-    subModule.install(dir, modulesRoot)
-  module.installOwn(dir, modulesRoot)
+  var sessionUnits: seq[ServiceSpec]
+  module.installTree(moduleDir, modulesRoot, sessionUnits)
+  startSessionUnits(sessionUnits)
 
 proc install*(reg: ModuleRegistery, moduleName: string) {.raises: [ModuleError].} =
   var done, pending: seq[string]
+  var sessionUnits: seq[ServiceSpec]
 
   proc installResolved(res: ResolvedModule) {.raises: [ModuleError].} =
     let m = res.module
@@ -104,11 +125,12 @@ proc install*(reg: ModuleRegistery, moduleName: string) {.raises: [ModuleError].
           raise newException(ModuleError,
             "Unknown dependency module '" & dep & "' of '" & m.name & "'")
         installResolved(r)
-      # 2. Submodules next; each resolves its own dependencies recursively.
+      # 2. Own packages, symlinks and units - before the submodules, which may
+      #    need this module's binaries or bind to its session target.
+      sessionUnits.add m.installOwn(res.parentDir / m.name, reg.moduleDir)
+      # 3. Submodules next; each resolves its own dependencies recursively.
       for sub in m.subModules:
         installResolved(ResolvedModule(found: true, module: sub, parentDir: res.parentDir / m.name))
-      # 3. Own packages and symlinks, then own units.
-      m.installOwn(res.parentDir / m.name, reg.moduleDir)
     except CatchableError as e:
       raise newException(ModuleError,
         "Failed to install module '" & m.name & "': " & e.msg, e)
@@ -121,19 +143,28 @@ proc install*(reg: ModuleRegistery, moduleName: string) {.raises: [ModuleError].
   if not res.found:
     raise newException(ModuleError, "Unknown module: " & moduleName)
   installResolved(res)
+  # 4. Last: bring up the units that need a compositor, but only if one is
+  #    actually running. From a TTY or an SSH session they stay enabled and
+  #    inert, and sway's session script starts them on the next login.
+  try:
+    startSessionUnits(sessionUnits)
+  except ServiceError as e:
+    raise newException(ModuleError,
+      "Failed to start session units of module '" & moduleName & "': " & e.msg, e)
 
 proc uninstall*(module: Module, moduleDir, modulesRoot: string) {.
     raises: [PackageError, ServiceError, SymlinkError, IOError, OSError].} =
   let dir = moduleDir / module.name
-  # Reverse of install: stop this module's units first, then remove its
-  # symlinks and packages, then recurse into submodules. Dependencies (other
-  # modules) are intentionally left alone; they may still be in use.
+  # Reverse of install: submodules first (their units depend on this module's
+  # packages and target), then this module's units, symlinks and packages.
+  # Dependencies (other modules) are intentionally left alone; they may still
+  # be in use.
+  for subModule in module.subModules:
+    subModule.uninstall(dir, modulesRoot)
   uninstallServices(loadServices(dir))
   uninstallSymlinks(symlinkSpecs(dir, modulesRoot))
   for path in packageFiles(dir):
     uninstallAll(loadSpecFile(path))
-  for subModule in module.subModules:
-    subModule.uninstall(dir, modulesRoot)
 
 proc uninstall*(reg: ModuleRegistery, moduleName: string) {.raises: [ModuleError].} =
   let res = reg.findModule(moduleName)
@@ -153,7 +184,8 @@ proc statusDetail*(reg: ModuleRegistery, moduleName: string): (ModuleStatus, seq
   var missing, unverifiable: seq[string]
   var done, pending: seq[string]
 
-  proc visit(res: ResolvedModule) {.raises: [ModuleError, PackageError, ServiceError, SymlinkError, IOError, OSError].} =
+  proc visit(res: ResolvedModule) {.raises: [ModuleError, PackageError, RepoError,
+      ServiceError, SymlinkError, IOError, OSError].} =
     let m = res.module
     if m.name in done:
       return # count each module once, even with diamond dependencies
@@ -163,6 +195,14 @@ proc statusDetail*(reg: ModuleRegistery, moduleName: string): (ModuleStatus, seq
     pending.add m.name
     try:
       let dir = res.parentDir / m.name
+      for repo in loadRepos(dir):
+        inc total
+        let item = m.name & ": repo '" & repo.name & "' [pacman.conf]"
+        try:
+          if repo.isInstalled(): inc installed
+          else: missing.add item & " is not enabled"
+        except RepoError as e:
+          unverifiable.add item & " cannot be verified: " & e.msg
       for path in packageFiles(dir):
         for spec in loadSpecFile(path):
           inc total

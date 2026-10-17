@@ -19,6 +19,41 @@ proc sh*(cmd: string, args: varargs[string]): string =
   except CatchableError:
     result = ""
 
+proc isUnsignedInt*(s: string): bool =
+  ## Non-empty run of ASCII digits. Deliberately not `std/re`: the bar must
+  ## start even when no PCRE1 (`libpcre.so`) can be dlopened - see the
+  ## bootstrap contract in README.org.
+  if s.len == 0: return false
+  for c in s:
+    if c < '0' or c > '9': return false
+  true
+
+proc csvIntPair*(s: string): (string, string) =
+  ## First line of `s` whose first two comma-separated fields are unsigned
+  ## integers: nvidia-smi's `--format=csv,noheader,nounits` row "57, 43" ->
+  ## ("57", "43"). ("", "") when there is none.
+  for line in s.splitLines:
+    let cols = line.split(',')
+    if cols.len >= 2:
+      let (a, b) = (cols[0].strip, cols[1].strip)
+      if isUnsignedInt(a) and isUnsignedInt(b):
+        return (a, b)
+  ("", "")
+
+proc percentValue*(s: string): string =
+  ## The first "NN%" run in `s` ("45"), "" when absent - pactl prints the sink
+  ## volume as a percentage among hex/dec volume fields.
+  var i = 0
+  while i < s.len:
+    if s[i] in '0' .. '9':
+      var j = i
+      while j < s.len and s[j] in '0' .. '9': inc j
+      if j < s.len and s[j] == '%': return s[i ..< j]
+      i = j
+    else:
+      inc i
+  ""
+
 proc spawnDetached*(cmd: string) =
   ## Fire-and-forget a command (GUI launches) with its stdio nowhere.
   try:

@@ -12,13 +12,14 @@
 # Configuration (set in .env or the environment before sourcing):
 #   NIM_VERSION    pinned Nim version    (default: 2.2.12)
 #   NIM_URL        override download URL (default: official pre-built tarball)
-#   ALATAR_HOME    alatar data dir       (default: ~/.alatar2)
+#   ALATAR_HOME    alatar data dir       (default: ~/.alatar)
 #   NIM_SETUP_DIR  toolchain dir         (default: ~/.local/share/nim)
 #   NIM_USER_BIN   user-global bin dir   (default: ~/.local/bin)
 #
 # After nim::ensure: $NIM_CMD points at the compiler and PATH is updated.
+# PATH is also persisted to common shell RC files so new shells can find nim.
 
-ALATAR_HOME="${ALATAR_HOME:-$HOME/.alatar2}"
+ALATAR_HOME="${ALATAR_HOME:-$HOME/.alatar}"
 NIM_VERSION="${NIM_VERSION:-2.2.12}"
 NIM_SETUP_DIR="${NIM_SETUP_DIR:-$HOME/.local/share/nim}"
 NIM_USER_BIN="${NIM_USER_BIN:-$HOME/.local/bin}"
@@ -53,7 +54,7 @@ nim::hijack_choosenim() {
 
 nim::install_prebuilt() {
     for dep in curl tar xz; do
-        command -v "$dep" >/dev/null 2>&1 || { nim::log "error: $dep is required"; return 1; }
+        command -v "$dep" >/dev/null 2>&1 || { nim::log "error: $dep is required (install with: sudo pacman -S --needed $dep)"; return 1; }
     done
 
     # Wipe any previous installation (ours or a stale partial one): a version
@@ -68,16 +69,24 @@ nim::install_prebuilt() {
     tmp="$(mktemp -d)"
 
     nim::log "downloading $NIM_URL"
-    curl -fL --retry 3 -o "$tmp/nim.tar.xz" "$NIM_URL"
+    curl -fL --retry 3 --retry-delay 2 -o "$tmp/nim.tar.xz" "$NIM_URL" || {
+        nim::log "error: failed to download $NIM_URL"
+        rm -rf "$tmp"
+        return 1
+    }
 
     nim::log "extracting to $NIM_SETUP_DIR"
     mkdir -p "$NIM_SETUP_DIR"
-    tar -xJf "$tmp/nim.tar.xz" -C "$NIM_SETUP_DIR" --strip-components=1
+    tar -xJf "$tmp/nim.tar.xz" -C "$NIM_SETUP_DIR" --strip-components=1 || {
+        nim::log "error: failed to extract nim tarball"
+        rm -rf "$tmp" "$NIM_SETUP_DIR"
+        return 1
+    }
     rm -rf "$tmp"
 
     # The pre-built tree is self-contained: bin/{nim,nimble,nimsuggest,...}
     # plus config/ and lib/. Verify the bundled compiler actually runs.
-    if [ -x "$NIM_BIN/nim" ] && ! "$NIM_BIN/nim" --version >/dev/null 2>&1; then
+    if [ ! -x "$NIM_BIN/nim" ] || ! "$NIM_BIN/nim" --version >/dev/null 2>&1; then
         nim::log "error: extracted nim does not run"
         return 1
     fi
@@ -88,10 +97,63 @@ nim::link_global() {
     mkdir -p "$NIM_USER_BIN"
     local tool name
     for tool in "$NIM_BIN"/*; do
+        [ -e "$tool" ] || continue
         name="$(basename "$tool")"
         ln -sf "$tool" "$NIM_USER_BIN/$name"
     done
-    nim::log "linked $(ls "$NIM_BIN" | tr '\n' ' ') into $NIM_USER_BIN"
+    nim::log "linked $(ls "$NIM_BIN" 2>/dev/null | wc -l) tools into $NIM_USER_BIN"
+}
+
+nim::persist_path() {
+    # Ensure NIM_USER_BIN is in PATH for future shells
+    local path_entry='export PATH="$HOME/.local/bin:$PATH"'
+    local rc_files=(
+        "$HOME/.bashrc"
+        "$HOME/.bash_profile"
+        "$HOME/.profile"
+        "$HOME/.zshrc"
+        "$HOME/.config/fish/config.fish"
+    )
+
+    for rc in "${rc_files[@]}"; do
+        local rc_dir
+        rc_dir="$(dirname "$rc")"
+        mkdir -p "$rc_dir" 2>/dev/null || true
+
+        if [ -f "$rc" ] || [ -w "$rc_dir" ]; then
+            # For fish, use fish_add_path if not already there
+            if [[ "$rc" == *"fish"* ]]; then
+                local fish_entry='fish_add_path --prepend "$HOME/.local/bin" 2>/dev/null; or set -gx PATH "$HOME/.local/bin" $PATH'
+                if ! grep -q "$HOME/.local/bin" "$rc" 2>/dev/null; then
+                    echo "" >> "$rc"
+                    echo "# Added by alatar's nim setup" >> "$rc"
+                    echo "$fish_entry" >> "$rc"
+                    nim::log "added PATH to $rc"
+                fi
+            else
+                # Bash/Zsh/sh style
+                if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$rc" 2>/dev/null && \
+                   ! grep -q '$HOME/.local/bin' "$rc" 2>/dev/null; then
+                    echo "" >> "$rc"
+                    echo "# Added by alatar's nim setup" >> "$rc"
+                    echo "$path_entry" >> "$rc"
+                    nim::log "added PATH to $rc"
+                fi
+            fi
+        fi
+    done
+}
+
+nim::ensure_path_current() {
+    # Add to current PATH if not present
+    case ":$PATH:" in
+        *":$NIM_USER_BIN:"*) ;;
+        *) PATH="$NIM_USER_BIN:$PATH"; export PATH ;;
+    esac
+    case ":$PATH:" in
+        *":$NIM_BIN:"*) ;;
+        *) PATH="$NIM_BIN:$PATH"; export PATH ;;
+    esac
 }
 
 nim::ensure() {
@@ -106,22 +168,24 @@ nim::ensure() {
     have="$(nim::installed_version || true)"
 
     if [ "$have" != "$NIM_VERSION" ] || [ ! -f "$NIM_VERSION_MARKER" ]; then
-        nim::install_prebuilt
+        nim::install_prebuilt || return 1
     else
         nim::log "nim $NIM_VERSION already installed in $NIM_SETUP_DIR"
     fi
 
     nim::hijack_choosenim
     nim::link_global
+    nim::ensure_path_current
+    nim::persist_path
 
-    PATH="$NIM_USER_BIN:$NIM_BIN:$PATH"
-    export PATH
     NIM_CMD="$NIM_BIN/nim"
     [ -x "$NIM_CMD" ] || { nim::log "error: no nim binary at $NIM_CMD"; return 1; }
 
     # Warn (but don't touch) about system-wide nim outside our control.
-    if [ -e /usr/bin/nim ] && [ "$(readlink -f /usr/bin/nim)" != "$(readlink -f "$NIM_CMD")" ]; then
-        nim::log "note: a system nim exists at /usr/bin/nim ($(nim --version 2>/dev/null | head -1)); $NIM_USER_BIN shadows it for this user. To remove: sudo pacman -Rns nim"
+    if [ -e /usr/bin/nim ] && [ "$(readlink -f /usr/bin/nim 2>/dev/null)" != "$(readlink -f "$NIM_CMD" 2>/dev/null)" ]; then
+        local sys_ver
+        sys_ver="$(/usr/bin/nim --version 2>/dev/null | head -1 || echo 'unknown')"
+        nim::log "note: a system nim exists at /usr/bin/nim ($sys_ver); $NIM_USER_BIN shadows it for this user. To remove: sudo pacman -Rns nim"
     fi
 
     nim::log "using: $("$NIM_CMD" --version | head -1)"
@@ -131,7 +195,7 @@ nim::ensure() {
     smoke_dir="$(mktemp -d)"
     printf 'echo "Hello from Nim!"\n' > "$smoke_dir/smoke.nim"
     smoke_out="$("$NIM_CMD" r "$smoke_dir/smoke.nim" 2>&1 | tail -1)" \
-        || { rm -rf "$smoke_dir"; nim::log "error: smoke test failed: $smoke_out"; return 1; }
+        || { rm -rf "$smoke_dir"; nim::log "error: smoke test failed"; return 1; }
     rm -rf "$smoke_dir"
     nim::log "smoke test: $smoke_out"
 
@@ -140,6 +204,8 @@ nim::ensure() {
     else
         nim::log "warning: nimble not found - package management unavailable"
     fi
+
+    nim::log "nim is ready! Run 'source ~/.bashrc' (or open a new terminal) to use in new shells"
 }
 
 # Standalone execution: bash lib/nim.sh

@@ -1,5 +1,4 @@
 [[package]]
-name = "emacs"
+name = "emacs-wayland"
 source = "arch"
-before = true
 tags = ["dev", "editor"]

@@ -5,6 +5,11 @@ Documentation=https://gitlab.gnome.org/Archive/policykit-gnome
 # start it with the sway session, like the other session services.
 PartOf=sway-session.target
 After=sway-session.target
+# Same guards as wallpaper.service: outside a session the agent has no
+# compositor to register with, so skip cleanly instead of crash-looping.
+ConditionEnvironment=WAYLAND_DISPLAY
+StartLimitBurst=5
+StartLimitIntervalSec=30
 
 [Service]
 Type=exec

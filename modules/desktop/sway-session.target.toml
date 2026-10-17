@@ -1,10 +1,11 @@
 [Unit]
 Description=sway (user) session target
 Documentation=https://github.com/swaywm/sway
-Keywords=desktop sway
 # No BindsTo=graphical-session.target: this sway session is started from a
 # TTY and never activates graphical-session.target, so the packaged unit
 # (which binds to it) can never start here. sway starts this target
-# directly (see appearance.conf: systemctl --user --no-block start
-# sway-session.target after import-environment), and session services like
-# wallpaper.service pull themselves in via WantedBy=sway-session.target.
+# directly (see scripts/start-wallpaper-service.sh, run by appearance.conf),
+# and session services like wallpaper.service pull themselves in via
+# WantedBy=sway-session.target. There is no [Install] section on purpose:
+# the target is static, alatar enables it nowhere and only starts it when a
+# Wayland session is already up.

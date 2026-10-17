@@ -1,0 +1,16 @@
+# Repositories alatar enables in /etc/pacman.conf before any package of any
+# module is installed. core depends on this module, so `alatar install core`
+# (and everything above it) gets these first.
+#
+# name    the [section] to enable
+# include the Include line written under the header (optional, defaults to
+#         /etc/pacman.d/mirrorlist - which serves every official repo,
+#         multilib included)
+# server  an explicit Server line instead of an Include (optional)
+#
+# Enabling is a one-way operation: dropping an entry here does not edit
+# /etc/pacman.conf back, because packages installed from that repo would
+# become untracked.
+
+[[repo]]
+name = "multilib"

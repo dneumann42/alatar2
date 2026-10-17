@@ -1,8 +1,29 @@
 #!/usr/bin/env bash
+# Bootstrap alatar on a fresh Arch install.
+#
+# Installs the pieces alatar itself needs before any module can run, builds
+# the alatar binary and links it onto PATH. Everything else is declarative:
+#   alatar install all
+# installs the rest of the system through the module tree (packages.toml).
 
 set -euo pipefail
 
-sudo pacman -Syu --needed --noconfirm base-devel emacs
+# Toolchain and runtime deps of alatar itself:
+#   base-devel gcc/headers to compile Nim code
+#   git        nimble fetches deps via git; AUR bootstrap uses it too
+#   curl       nim toolchain download
+#   pcre       PCRE1 runtime, kept for std/re-built binaries. alatar and the
+#              sway statusbar use the pure-Nim engine, so the bootstrap itself
+#              never dlopens it (see the Bootstrap contract in README.org).
+#              NB: a libpcre.so.3 symlink pointing at pcre2 breaks every
+#              std/re binary - Nim tries .3 before .1.
+#   polkit     pkexec, the GUI-session fallback when alatar has no terminal
+#              to prompt on (polkit agent dialog)
+#   sudo       alatar's primary elevation path: one password per terminal,
+#              cached by sudo and shared with paru's own sudo calls
+#   emacs      user preference
+sudo pacman -Syu --needed --noconfirm \
+    base-devel git curl pcre polkit sudo emacs
 
 ALATAR_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export ALATAR_HOME="${ALATAR_HOME:-$ALATAR_ROOT}"
@@ -15,3 +36,10 @@ fi
 
 source "$ALATAR_ROOT/lib/nim.sh"
 nim::ensure
+
+# Build alatar and put it on PATH alongside the nim toolchain.
+nimble build
+mkdir -p "$NIM_USER_BIN"
+ln -sf "$ALATAR_ROOT/bin/alatar" "$NIM_USER_BIN/alatar"
+
+printf 'alatar: setup complete - run "alatar install all" to set up your modules\n' >&2

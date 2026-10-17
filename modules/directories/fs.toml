@@ -1,0 +1,18 @@
+[[directory]]
+path = "~/Music"
+
+[[directory]]
+path = "~/Pictures"
+
+[[directory]]
+path = "~/Workspace"
+
+[[file]]
+path = "~/Workspace/README.txt"
+content = "Clone projects here"
+
+[[directory]]
+path = "~/Downloads"
+
+[[directory]]
+path = "~/.repos"

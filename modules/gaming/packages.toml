@@ -1,3 +1,6 @@
+# steam only exists in [multilib], which archinstall leaves disabled. The
+# pacman module (a dependency of core) enables it, so this installs after
+# `alatar install all` - or after `alatar install pacman` on its own.
 [[package]]
 name = "steam"
 source = "arch"
@@ -6,9 +9,4 @@ tags = ["gaming"]
 [[package]]
 name = "lutris"
 source = "arch"
-tags = ["gaming"]
-
-[[package]]
-name = "dreamchess"
-source = "aur"
 tags = ["gaming"]
