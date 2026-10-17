@@ -1,0 +1,13 @@
+# GUI polkit setup: the polkit daemon (system-side, socket-activated through
+# the system bus - nothing to run from a user unit) plus the GNOME agent,
+# which is the dialog shown when an app asks for elevated privileges.
+
+[[package]]
+name = "polkit"
+source = "arch"
+tags = ["system", "security"]
+
+[[package]]
+name = "polkit-gnome"
+source = "arch"
+tags = ["wayland", "system", "security"]

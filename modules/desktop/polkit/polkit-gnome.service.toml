@@ -1,0 +1,18 @@
+[Unit]
+Description=polkit GNOME authentication agent
+Documentation=https://gitlab.gnome.org/Archive/policykit-gnome
+# The agent shows a GTK dialog, so it needs a live Wayland compositor:
+# start it with the sway session, like the other session services.
+PartOf=sway-session.target
+After=sway-session.target
+
+[Service]
+Type=exec
+# WAYLAND_DISPLAY reaches the user manager through sway's import-environment;
+# XDG_RUNTIME_DIR is set by the user manager itself.
+ExecStart=/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=sway-session.target

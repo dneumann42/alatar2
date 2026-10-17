@@ -86,11 +86,6 @@ source = "arch"
 tags = ["wayland", "media"]
 
 [[package]]
-name = "polkit-gnome"
-source = "arch"
-tags = ["wayland", "system"]
-
-[[package]]
 name = "lxqt-policykit"
 source = "arch"
 tags = ["wayland", "system"]
