@@ -1,16 +1,19 @@
 # Package
 
-version       = "0.1.0"
-description   = "Swaybar status line (i3bar/sway JSON protocol): media, cpu, temp, gpu, ram, network, volume, weather, date, clock, with click support."
+version       = "0.2.0"
+description   = "Swaybar status line (i3bar/sway JSON protocol): media, cpu, temp, gpu, ram, network, volume, weather, date, clock, with click support. Plus bar-buttons: configurable GTK4 layer-shell buttons beside the bar (buttons.toml)."
 license       = "MIT"
 author        = "dneumann"
 
 srcDir        = "src"
-bin           = @["statusbar"]
+bin           = @["statusbar", "barbuttons"]
 binDir        = "bin"
 
-# Stdlib only (os, osproc, strutils, times, json, re, math).
+# Stdlib only for statusbar (os, osproc, strutils, times, json, re, math).
+# bar-buttons adds parsetoml (buttons.toml) and dlopen'ed GTK4/
+# gtk4-layer-shell symbols (src/statusbar/layershell.nim — no link flags).
 requires "nim >= 2.0.0"
+requires "parsetoml >= 0.7.0"
 
 # Channel/Thread are built into the system module under --threads:on.
 switch "threads", "on"

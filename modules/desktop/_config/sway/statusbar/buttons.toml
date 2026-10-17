@@ -1,0 +1,52 @@
+# ============================================================================
+# swaybar side buttons — rendered by bin/barbuttons (this project's second
+# binary, started via scripts/bar-buttons.sh from sway's applications.conf).
+#
+# Each [[button]] is a small GTK4 layer-shell surface pinned to the top
+# edge of every monitor, sitting in the bar's side gaps (see `gaps` in
+# ../bar.conf — it must reserve button_width pixels per button per side).
+# Left-side buttons stack left→right from the screen's left edge in file
+# order; right-side buttons stack from the right edge. `command` runs in
+# `sh -c`, detached. Use `icon` (a png/jpg; relative paths resolve against
+# this file's directory) or `glyph` (a Nerd Font codepoint) per button.
+#
+# Edits apply live (the binary polls this file every second). Changing
+# button_width or the number of buttons per side also needs a `gaps`
+# update in bar.conf → run `swaymsg reload` after such edits.
+# ============================================================================
+
+bar_height   = 20        # px — sync with bar.conf `height`
+button_width = 24        # px — sync with bar.conf `gaps` (per button)
+icon_height  = 16        # px — rendered icon height (aspect ratio kept)
+
+background       = "#000000"   # $bar_bg so buttons blend into the bar
+hover_background = "#1c1f26"
+
+font      = "AtkynsonMono Nerd Font"   # glyph buttons, same as the bar
+font_size = 11                         # pt
+foreground       = "#9aa4b2"           # $muted
+hover_foreground = "#e6eaf2"           # $text
+
+# --- far left: nomicron ---
+[[button]]
+side    = "left"
+icon    = "nomicron-small.png"
+command = "notify-send Nomicron 'The nomicron calls to you.'"
+
+# --- left, right of the nomicron: gear ---
+[[button]]
+side    = "left"
+glyph   = "\uf013"          # fa-cog, from the Nerd Font
+command = "notify-send Settings 'You clicked the gear.'"
+
+# --- right: NIRSS TUI in a floating kitty (floats via window-rules.conf) ---
+[[button]]
+side    = "right"
+glyph   = "\uf120"          # fa-terminal, from the Nerd Font
+command = '''swaymsg -t get_tree | grep -q '"nirsstui"' && swaymsg '[app_id="nirsstui"] focus' || kitty --class nirsstui -e nirsstui'''
+
+# --- example right-side button (also widen bar.conf's `gaps` right!) ---
+# [[button]]
+# side    = "right"
+# glyph   = "\uf011"          # fa-power-off
+# command = "swaylock"

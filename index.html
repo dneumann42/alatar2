@@ -8,13 +8,15 @@
     body {
       background-color:#000000;
       color: white;
+      font-size: 2em;
     }
     h1 { font-size: 4em; }
     div { display: flex; flex-direction: column; }
     span { display: flex; flex-direction: row; }
-    input { border: 1px solid white; height: 1.5em; }
+    input { border: 1px solid white; height: 1.5em; padding-left: 12px; }
     button { border: 1px solid white; background-color: #444; padding: 0px 6px 0px 6px; height:  1.5em; }
-    a { text-decoration: underline; color: lightblue; display: block; }
+    a { text-decoration: underline; color: lightblue; display: block; cursor: pointer; }
+    .subtitle { color: gray; font-size: 0.75em }
     .flex { display: flex; }
     .flex-row { flex-direction: row; }
     .flex-col { flex-direction: column; }
@@ -36,9 +38,9 @@
 </head>
 <body class="flex flex-column justify-center items-center w100 h100">
   <div class="flex flex-column justify-center gap-md items-center">
-    <div class="flex flex-column items-start gap-md">
-      <h1>Search</h1>
-
+    <div class="flex flex-column items-start gap-sm">
+      <h1>Alatar</h1>
+      <p class="subtitle"> Browse the web and seek knowledge. </p>
       <form action="https://duckduckgo.com/" method="get" target="_blank">
         <span class="gap-sm items-center">
           <span class="items-center">

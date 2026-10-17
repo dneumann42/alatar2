@@ -38,6 +38,23 @@ name = "sway-contrib"
 source = "arch"
 tags = ["wayland", "compositor"]
 
+# bar-buttons (sway/statusbar project): dlopen'ed at runtime for the
+# GTK4 layer-shell button overlays, and for notify-send in its defaults.
+[[package]]
+name = "gtk4"
+source = "arch"
+tags = ["gui", "libs"]
+
+[[package]]
+name = "gtk4-layer-shell"
+source = "arch"
+tags = ["wayland", "gui", "libs"]
+
+[[package]]
+name = "libnotify"
+source = "arch"
+tags = ["desktop", "notifications"]
+
 [[package]]
 name = "swayimg"
 source = "arch"
