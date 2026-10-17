@@ -1,0 +1,18 @@
+[Unit]
+Description=Ask about out-of-place files in Downloads every 25 minutes
+# Dies with the session: outside one the service's ConditionEnvironment makes
+# every tick a no-op anyway, and a timer without a compositor to notify is
+# just wakeups for nothing.
+PartOf=sway-session.target
+
+[Timer]
+# First tick 25 minutes after the last check started running (which, at
+# session start, is the WantedBy= start of the service itself). Persistent
+# catches a missed slot after a reboot or a long suspend. The path unit
+# reacts to Downloads changing outright; this is the safety net that re-asks
+# a dismissed question.
+OnUnitActiveSec=25min
+Persistent=true
+
+[Install]
+WantedBy=sway-session.target

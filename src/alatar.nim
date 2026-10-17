@@ -1,7 +1,7 @@
 import std/[os, strutils, sequtils]
 import terminal
 
-import alatar/[fs, modules, packages, repos, services, symlinks]
+import alatar/[fs, modules, packages, repos, services, symlinks, tidy]
 
 import cligen
 
@@ -194,6 +194,49 @@ proc cmdInfo(names: seq[string], dir = defaultModulesDir()) =
       show(sub, mdir, depth + 1)
   show(res.module, res.parentDir, 0)
 
+proc defaultTidyConfig(): string =
+  try:
+    getEnv("ALATAR_TIDY_CONFIG",
+      expandVars("$XDG_CONFIG_HOME/alatar/tidy.toml"))
+  except CatchableError:
+    getEnv("ALATAR_TIDY_CONFIG",
+      getHomeDir() / ".config" / "alatar" / "tidy.toml")
+
+proc cmdTidy(targets: seq[string], config = defaultTidyConfig(),
+             dry = false, ask = false, recursive = false) =
+  if targets.len == 0:
+    quit "alatar: tidy expects at least one file or directory", 2
+  let rules =
+    try:
+      loadTidyFile(config)
+    except CatchableError as e:
+      quit "alatar: " & e.msg, 1
+  var plans: seq[Placement]
+  for target in targets:
+    if dirExists(target):
+      try:
+        plans.add plan(rules, target, recursive)
+      except CatchableError as e:
+        quit "alatar: " & e.msg, 1
+    elif fileExists(target) or symlinkExists(target):
+      try:
+        plans.add planFile(rules, target)
+      except CatchableError as e:
+        quit "alatar: " & e.msg, 1
+    else:
+      quit "alatar: no such file or directory '" & target & "'", 1
+  if plans.len == 0:
+    echo "everything in place."
+    return
+  if dry:
+    for p in plans:
+      echo p.source, "  ->  ", p.targetOf
+    quit 1
+  try:
+    applyMoves(plans, ask)
+  except TidyError as e:
+    quit "alatar: " & e.msg, 1
+
 proc start*() {.raises: [].} =
   try:
     dispatchMulti(
@@ -204,7 +247,15 @@ proc start*() {.raises: [].} =
        help = {"dir": dirHelp,
                "reasons": "max Error reasons to print per module (0 = all)"}),
       (cmdModules, cmdName = "modules", help = {"dir": dirHelp}),
-      (cmdInfo, cmdName = "info", help = {"dir": dirHelp}))
+      (cmdInfo, cmdName = "info", help = {"dir": dirHelp}),
+      (cmdTidy, cmdName = "tidy", positional = "targets",
+       doc = "Sort files into their homes per tidy.toml rules; --dry reports " &
+         "what is out of place (exit 1 if anything is) and moves nothing.",
+       help = {"config": "rules file [env: ALATAR_TIDY_CONFIG; default: " &
+                "$XDG_CONFIG_HOME/alatar/tidy.toml]",
+                "dry": "list misplaced files and exit 1, move nothing",
+                "ask": "confirm every move with y/N",
+                "recursive": "sort files in subdirectories too"}))
   except:
     quit "alatar: " & getCurrentExceptionMsg(), 1
 

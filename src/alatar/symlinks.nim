@@ -80,7 +80,7 @@ proc staticDirPrefix(pattern: string): string =
     inc i
   if lastSlash >= 0: pattern[0 ..< lastSlash] else: ""
 
-proc substituteCaptures(s: string, caps: openArray[string]): string =
+proc substituteCaptures*(s: string, caps: openArray[string]): string =
   ## Replaces $0..$9 and ${0}..${9} with the capture group texts.
   result = s
   for i in countdown(9, 0):

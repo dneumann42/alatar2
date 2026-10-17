@@ -1,0 +1,48 @@
+# alatar tidy rules: the first matching [[rule]] decides a file's home.
+# ext is case-insensitive; match is a regex over the whole filename.
+# to expands ~, $VAR and $0..$9 capture refs from match.
+# sh runs a command with $FILE, $FILENAME and $FILE_DIR in its environment
+# and takes the first stdout line as the destination; a silent or failing
+# sh falls back to the rule's own to.
+
+[[rule]]
+name = "screenshots"
+ext = ["png", "jpg", "jpeg"]
+match = '^(Screenshot|shot|scrot|grim).*'
+to = "~/Pictures/Screenshots"
+
+[[rule]]
+name = "images"
+ext = ["png", "jpg", "jpeg", "gif", "webp", "heic"]
+to = "~/Pictures"
+
+[[rule]]
+name = "invoices"
+ext = "pdf"
+match = '^(invoice|receipt|rechnung|quittance).*\.pdf'
+to = "~/Documents/Finance/$1"
+
+[[rule]]
+name = "documents"
+ext = ["pdf", "epub", "doc", "docx", "odt", "txt", "md"]
+to = "~/Documents"
+
+[[rule]]
+name = "audio"
+ext = ["mp3", "flac", "m4a", "ogg", "opus"]
+to = "~/Music"
+
+[[rule]]
+name = "video"
+ext = ["mkv", "mp4", "webm", "avi", "mov"]
+to = "~/Videos"
+
+[[rule]]
+name = "archives"
+ext = ["zip", "tar", "gz", "tgz", "xz", "7z", "iso"]
+to = "~/Downloads/Archives"
+
+# [[rule]]
+# name = "classified"
+# sh = 'my-classifier "$FILE"'
+# to = "~/Downloads/Triage"

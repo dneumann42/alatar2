@@ -1,0 +1,21 @@
+[Unit]
+Description=Ask about out-of-place files in Downloads (alatar tidy --dry + mako)
+# Session service, not a login service: the reminder is a mako notification,
+# so outside a Wayland session there is nobody to ask. Same guard as
+# wallpaper.service: the condition fails cleanly and the timer tick is a
+# no-op instead of a failing unit.
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=oneshot
+# The script blocks in notify-send --wait until the user answers. A slow human
+# must never look like a hung unit: no start timeout. While this instance is
+# still active, further timer ticks merge into it, so only one question is
+# ever open at a time.
+TimeoutStartSec=0
+ExecStart=%h/.local/bin/downloads-watch.sh
+
+[Install]
+# Checked at sway startup; the companion timer asks every 25 minutes and the
+# path unit fires on any change inside Downloads.
+WantedBy=sway-session.target

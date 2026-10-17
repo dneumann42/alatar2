@@ -5,6 +5,7 @@ type
     service
     timer
     target
+    path
 
   ServiceSpec* = object
     unitName*: string   # e.g. "wallpaper.service"
@@ -110,20 +111,22 @@ proc sessionLive*(): bool {.raises: [ServiceError].} =
   access(socket.cstring, F_OK) == 0
 
 proc loadServices*(moduleDir: string): seq[ServiceSpec] {.raises: [OSError].} =
-  ## Finds '<name>.service.toml', '<name>.timer.toml' and '<name>.target.toml'
-  ## files in a module directory. The '.toml' suffix is stripped for the
-  ## installed unit name.
-  for walkKind, path in walkDir(moduleDir):
+  ## Finds '<name>.service.toml', '<name>.timer.toml', '<name>.target.toml'
+  ## and '<name>.path.toml' files in a module directory. The '.toml' suffix
+  ## is stripped for the installed unit name.
+  for walkKind, unitPath in walkDir(moduleDir):
     if walkKind != pcFile: continue
-    let tail = path.lastPathPart
+    let tail = unitPath.lastPathPart
     if tail.endsWith(".service.toml") or tail.endsWith(".timer.toml") or
-        tail.endsWith(".target.toml"):
+        tail.endsWith(".target.toml") or tail.endsWith(".path.toml"):
       let unitName = tail[0 ..< tail.len - ".toml".len]
       let kind =
         if unitName.endsWith(".service"): service
         elif unitName.endsWith(".timer"): timer
+        elif unitName.endsWith(".path"): path
         else: target
-      result.add ServiceSpec(unitName: unitName, kind: kind, sourcePath: path)
+      result.add ServiceSpec(unitName: unitName, kind: kind,
+        sourcePath: unitPath)
 
 proc isActive(svc: ServiceSpec): bool {.raises: [ServiceError].} =
   systemctlCapture(@["is-active", svc.unitName]) == "active"
@@ -255,10 +258,28 @@ proc startSessionUnits*(svcs: seq[ServiceSpec]) {.raises: [ServiceError].} =
     raise newException(ServiceError,
       "Starting session units failed:\n" & failures.join("\n"))
 
+proc isOneshot*(svc: ServiceSpec): bool {.raises: [].} =
+  ## Whether the unit source declares `Type=oneshot`. Scheduled units
+  ## (timers, paths, triggered checks) run briefly and return to inactive;
+  ## requiring "active" would flag every healthy oneshot as broken.
+  if not fileExists(svc.sourcePath):
+    return false
+  try:
+    for line in readFile(svc.sourcePath).splitLines:
+      let entry = line.strip
+      if entry.len == 0 or entry[0] == '#' or entry[0] == ';':
+        continue
+      if entry.toLowerAscii == "type=oneshot":
+        return true
+  except CatchableError:
+    discard
+  return false
+
 proc isInstalled*(svc: ServiceSpec): bool {.raises: [ServiceError].} =
   ## A unit counts as installed when its unit file is in place and matches
   ## the module source, and the unit is enabled (or statically triggered, as
-  ## timer-activated services are) and active.
+  ## timer-activated services are) and active - with one exception: a oneshot
+  ## that is enabled and merely finished is healthy until its next trigger.
   let dest = userUnitDir() / svc.unitName
   if not fileExists(dest):
     return false
@@ -276,6 +297,10 @@ proc isInstalled*(svc: ServiceSpec): bool {.raises: [ServiceError].} =
   # be running - that is what catches "no wallpaper when I start sway".
   if svc.needsSession and not sessionLive():
     return true
+  # A oneshot that completed between triggers is the healthy state, not a
+  # stopped daemon: the timer/path is what keeps it alive to run again.
+  if svc.isOneshot:
+    return true
   let active = systemctlCapture(@["is-active", svc.unitName])
   active == "active"
 
@@ -290,7 +315,7 @@ proc uninstallServices*(svcs: seq[ServiceSpec]) {.raises: [ServiceError].} =
     removedAny = true
     try:
       case svc.kind
-      of service, timer:
+      of service, timer, path:
         systemctlCheck(@["disable", "--now", svc.unitName])
       of target:
         systemctlCheck(@["stop", svc.unitName])

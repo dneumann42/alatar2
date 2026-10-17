@@ -13,10 +13,14 @@
 #     script builds a tiny chrome_url_overrides extension around the same
 #     index.html and installs it through ExtensionSettings' "path" property
 #     (local-path policy installs are exempt from AMO signing).
-# Additionally it installs lib/waterfox-userchrome.css (20px undecorated
-# tabs) into every Waterfox profile as chrome/userChrome.css and enables
+# Additionally it installs lib/waterfox-userchrome.css (hyper-minimal tabs,
+# 10px glyphs, zero padding, black chrome - all tunable knobs at the top of
+# the css) into every Waterfox
+# profile as chrome/userChrome.css and enables
 # user stylesheets by appending the legacy-customizations pref to user.js
-# (re-applied on every start, safe to write while the browser is running).
+# (safe to write while the browser is running, but note: user.js and
+# userChrome.css are only read at startup, so a running browser keeps its
+# old chrome until it is fully quit and restarted).
 # CLI addon installation (old -install-global-extension) no longer exists,
 # so policies are the scriptable route.
 #
@@ -48,6 +52,15 @@ WATERFOX_EXTENSIONS=(
 
 waterfox::log() { printf 'alatar/waterfox: %s\n' "$*" >&2; }
 
+# The G5 launcher re-execs itself as waterfox-bin, and distro symlinks are
+# commonly named waterfox-g, so the live process name is rarely "waterfox".
+# Match all three to detect a running browser.
+waterfox::running() {
+    pgrep -x waterfox     >/dev/null 2>&1 ||
+    pgrep -x waterfox-g   >/dev/null 2>&1 ||
+    pgrep -x waterfox-bin >/dev/null 2>&1
+}
+
 waterfox::app_dir() {
     [ -n "$WATERFOX_BIN" ] || { waterfox::log "error: waterfox not found on PATH"; return 1; }
     dirname "$(readlink -f "$WATERFOX_BIN")"
@@ -64,6 +77,7 @@ waterfox::install_userchrome() {
     [ -f "$ini" ] || { waterfox::log "warn: no profiles.ini at $ini - skipping userChrome"; return 0; }
 
     local path
+    local installed=0
     while IFS= read -r path; do
         [ -n "$path" ] || continue
         local pdir
@@ -73,7 +87,12 @@ waterfox::install_userchrome() {
         grep -q 'legacyUserProfileCustomizations' "$pdir/user.js" 2>/dev/null || \
             echo 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' >> "$pdir/user.js"
         waterfox::log "userChrome.css installed: $pdir"
+        installed=1
     done < <(grep '^Path=' "$ini" | cut -d= -f2-)
+    if [ "$installed" = 1 ] && waterfox::running; then
+        waterfox::log "note: userChrome.css/user.js are only read at startup - fully quit and restart waterfox for the styling to apply"
+    fi
+    return 0
 }
 
 waterfox::build_newtab_extension() {
@@ -182,8 +201,8 @@ waterfox::ensure() {
     rm -f "$tmp"
 
     waterfox::log "enforcing: darkreader, vimium, proton-pass, alatar-newtab; default engine: $WATERFOX_DEFAULT_ENGINE; home/newtab: $index_url"
-    if pgrep -x waterfox >/dev/null 2>&1; then
-        waterfox::log "note: waterfox is running - restart it to apply"
+    if waterfox::running; then
+        waterfox::log "note: waterfox is running - fully quit and restart it to apply (extensions, policies, userChrome)"
     else
         waterfox::log "extensions will install on next waterfox start"
     fi

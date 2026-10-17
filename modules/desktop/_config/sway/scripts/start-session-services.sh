@@ -45,7 +45,7 @@ systemctl --user --no-block start sway-session.target 2>/dev/null || true
 # Units enabled *after* the target was last activated - i.e. everything alatar
 # installs into a live session - are not pulled in by a target that is already
 # up, so start them by name. is-enabled keeps disabled units out.
-for unit in wallpaper.service polkit-gnome.service; do
+for unit in wallpaper.service polkit-gnome.service downloads-watch.service downloads-watch.path downloads-watch.timer; do
     systemctl --user is-enabled "$unit" >/dev/null 2>&1 || continue
     systemctl --user --no-block start "$unit" 2>/dev/null || true
 done

@@ -1,0 +1,16 @@
+[Unit]
+Description=Ask about out-of-place files the moment Downloads changes
+# Session thing: the check is a mako reminder, so no session, no watching.
+PartOf=sway-session.target
+
+[Path]
+# inotify under the hood: creating, renaming or moving anything inside
+# %h/Downloads activates downloads-watch.service. systemd rate-limits the
+# watch itself - a directory churning more than 30 times in 30s falls back
+# to polling instead of flooding the job queue - and a trigger while the
+# service still waits for an answer just merges into the running instance.
+PathChanged=%h/Downloads
+Unit=downloads-watch.service
+
+[Install]
+WantedBy=sway-session.target

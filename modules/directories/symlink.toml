@@ -1,0 +1,2 @@
+["directories/(tidy.toml)"]
+to = "$XDG_CONFIG_HOME/alatar/tidy.toml"

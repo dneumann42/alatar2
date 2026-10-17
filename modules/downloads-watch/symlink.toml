@@ -1,0 +1,2 @@
+["downloads-watch/(downloads-watch.sh)"]
+to = "$HOME/.local/bin/$1"

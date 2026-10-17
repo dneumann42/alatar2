@@ -26,6 +26,51 @@ removes the links; a real file or directory in the way triggers a y/n
 replace prompt. Directories starting with `_` (like `desktop/_config`) are
 the module's own files, never submodules.
 
+tidy.toml decides where loose files belong on the machine: each `[[rule]]`
+table has optional predicates `ext` (a string or array of filename
+extensions, case-insensitive) and `match` (a regex, pure-Nim engine,
+matched against the whole basename), plus a destination: `to` (a directory
+template with `~`, $VAR and $0..$9 capture references from `match`) and/or
+`sh` (a shell command; the candidate file is exported as `$FILE`,
+`$FILENAME` and `$FILE_DIR`, and the first stdout line becomes the
+destination). Rules are consulted in order and the first one that yields a
+destination wins; a failing or silent `sh` falls back to the rule's own
+`to`, and without one the file just goes to the next rule - a predicate-less
+last rule is the catch-all. `alatar tidy FILE|DIR...` *moves* the files that
+do not live where their rule says (a real move: rename on the same
+filesystem, copy+delete across devices, never a symlink; name collisions get
+a ` (1)` suffix; hidden files are skipped, `--recursive` descends).
+`--dry` only prints `file -> target` and exits 1 when anything is out of
+place. The `downloads-watch` module turns that into a live reminder: a
+systemd path unit (inotify on `~/Downloads`), a 25-minute timer and the
+session start all run `downloads-watch.service`, which pops a mako
+notification listing the out-of-place files with a "Move them" default
+action - its button or a left click on the notification (mako's
+`on-button-left` binding, shipped in `desktop/_config`) runs the tidy over
+the directory, and a second notification reports the result. Dismiss or
+expiry leaves the files alone until the next trigger. `alatar tidy --ask`
+is the same question in a terminal. The rules file defaults to
+`$XDG_CONFIG_HOME/alatar/tidy.toml` (override: `ALATAR_TIDY_CONFIG`); the
+`directories` module ships a starter ruleset linked to exactly that path,
+so the rules live in the repo like every other config and edits take
+effect in place (`alatar install directories` creates the link on first
+use).
+
+    [[rule]]
+    name = "invoices"
+    ext = "pdf"
+    match = '^(invoice|receipt)-[0-9]+.*\.pdf'
+    to = "~/Documents/Finance/$1"
+
+    [[rule]]
+    ext = ["png", "jpg"]
+    to = "~/Pictures"
+
+    [[rule]]
+    ext = ["mkv", "mp4"]
+    sh = 'media-dir "$FILE"'   # any classifier script; empty output = rule abstains
+    to = "~/Videos"
+
 Bootstrap contract:
 
 - A module's =dependencies= file lists modules installed fully before its own

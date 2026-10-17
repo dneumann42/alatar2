@@ -2,7 +2,7 @@
 
 set -eu
 
-wallpapers="${WALLPAPERS_DIR:-$HOME/Media/Wallpapers}"
+wallpapers="${WALLPAPERS_DIR:-$HOME/Pictures/Wallpapers}"
 
 if [ ! -d "$wallpapers" ]; then
     echo "wallpaper directory not found: $wallpapers" >&2
