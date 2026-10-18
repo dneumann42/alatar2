@@ -10,15 +10,27 @@
 #   3. the theme background colour, so a fresh install gets a deliberate
 #      background instead of a black screen
 #
+# Whatever image ends up on screen, wallust then regenerates the desktop
+# theme from it (sway/kitty colors in ~/.cache/wallust - see
+# ~/.config/wallust/wallust.toml), so the palette always matches the picture.
+#
 # Always exits 0: not finding a wallpaper must never mark the unit failed.
 # ============================================================================
 set -u
 
 cache="${XDG_CACHE_HOME:-$HOME/.cache}/awww"
 wallpapers="${WALLPAPERS_DIR:-$HOME/Media/Wallpapers}"
-fallback="${WALLPAPER_FALLBACK:-111318}"   # awww wants rrggbb, without the '#'
+fallback="${WALLPAPER_FALLBACK:-000000}"   # awww wants rrggbb, without the '#'
 
 command -v awww >/dev/null 2>&1 || { echo "apply-wallpaper: awww not on PATH" >&2; exit 0; }
+
+# Regenerate the wallust theme from a displayed image. The hooks in
+# wallust.toml apply it (sway reload, notification). Best-effort: no wallust
+# or a failed generation must leave the unit and the wallpaper alone.
+generate_theme() {
+    command -v wallust >/dev/null 2>&1 || { echo "apply-wallpaper: wallust not on PATH" >&2; return 0; }
+    wallust run "$1" || echo "apply-wallpaper: wallust failed, theme unchanged" >&2
+}
 
 # The daemon binds its socket a moment after it is exec'd: wait up to ~5 s.
 i=0
@@ -36,6 +48,13 @@ fi
 #    status alone would leave the outputs black and skip the steps below.
 if [ -n "$(find "$cache" -type f -print -quit 2>/dev/null)" ] &&
    awww restore >/dev/null 2>&1; then
+    # `awww query` prints "<output>: ... currently displaying: image: <path>"
+    # for pictures and "... color: RRGGBB" after `awww clear`: only the image
+    # lines feed a palette, so the sed yields empty for a solid colour.
+    shown="$(awww query 2>/dev/null | sed -n 's/.* currently displaying: image: //p' | head -n 1)"
+    if [ -n "$shown" ]; then
+        generate_theme "$shown"
+    fi
     exit 0
 fi
 
@@ -45,6 +64,7 @@ if [ -d "$wallpapers" ]; then
               \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) \
               2>/dev/null | shuf -n 1)"
     if [ -n "$pick" ] && awww img -t none "$pick" >/dev/null 2>&1; then
+        generate_theme "$pick"
         exit 0
     fi
 fi

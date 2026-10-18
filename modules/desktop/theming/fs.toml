@@ -1,0 +1,25 @@
+# ============================================================================
+# Seed the wallust output directory. sway's include, kitty's include and
+# mako's --config point at ~/.cache/wallust/<app> files, so from the very
+# first boot they must find *something*: alatar creates these empty-ish
+# placeholders (comment lines all parsers accept) and never rewrites them -
+# from then on the files belong to wallust, which overwrites them on every
+# wallpaper change. Without them a fresh install would watch the config
+# parsers complain about a missing include until the first `wallust run`.
+# (wallust.el is not seeded: emacs guards its load with file-exists-p.)
+# ============================================================================
+
+[[directory]]
+path = "~/.cache/wallust"
+
+[[file]]
+path = "~/.cache/wallust/sway-theme.conf"
+content = "# wallust: no theme generated yet - sway keeps the appearance.conf defaults\n"
+
+[[file]]
+path = "~/.cache/wallust/kitty-theme.conf"
+content = "# wallust: no theme generated yet - kitty keeps the kitty.conf defaults\n"
+
+[[file]]
+path = "~/.cache/wallust/mako.conf"
+content = "# wallust: no theme generated yet - mako keeps its built-in defaults\n"

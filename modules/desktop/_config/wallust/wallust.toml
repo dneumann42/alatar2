@@ -1,0 +1,75 @@
+# ============================================================================
+# wallust - palette generator ("a better pywal"), config for the v4-alpha
+# that wallust-git builds. Owned by the desktop/theming module: alatar links
+# this directory to ~/.config/wallust, so templates/ below arrives with it.
+#
+# Theme pipeline:
+#   set-wallpaper.sh picks a picture -> `awww img` displays it ->
+#   `wallust run <image>` extracts a 16-color palette from that same picture,
+#   renders the templates below into ~/.cache/wallust/, then runs the hooks.
+#   sway and kitty include the generated files (see sway/appearance.conf and
+#   kitty/kitty.conf), the emacs daemon re-reads wallust.el, and the mako
+#   hook reloads the daemon's generated config - one wallpaper change
+#   re-themes the whole desktop; the notify hook pops a palette notification.
+#   Docs: https://explosion-mental.codeberg.page/wallust / man wallust.5
+# ============================================================================
+
+# ~ Backend ~
+# How pixels are read from the image. fastresize is the SIMD default and
+# finishes well before awww's transition animation ends.
+backend = "fastresize"
+
+# ~ Palette ~
+# How the pixels become the 16-color scheme. `salience` - the v4 flagship -
+# gathers the image's perceptually prominent colors, so each wallpaper gets
+# its own hue spread instead of the `ansi` mode's canonical red/green/
+# yellow/blue skeleton (ansi made every wallpaper look like the same six
+# hues with only drifting lightness). `distributed` sampling covers the
+# image's extremes, `vibrant` intensity pushes colorfulness up, and
+# `saturation` (1-100) boosts the result further.
+# NOTE: with salience, hues carry no role guarantee (color4 is not "the
+# blue" anymore) - the templates map palette colors to accent/surface roles
+# only and keep semantic slots (urgent, error, critical) static.
+palette = "salience"
+salience = { sampling = "distributed", intensity = "vibrant" }
+saturation = 60
+
+# ~ Style ~
+# Dark background, light foreground - matches the session default.
+style = "dark"
+
+# ~ Alpha ~
+# Only feeds the `alpha`/`alpha_hexa` template filters: the sway template
+# appends it to the background's hex digits so the bar shows the wallpaper
+# through (#RRGGBBAA).
+alpha = 85
+
+[templates]
+# template = file inside this directory's templates/ (the templates dir is
+# relative to wallust.toml); target = where the rendered result is written
+# (`~` expands). The cache files sway/kitty include are seeded by the theming
+# module's fs.toml; wallust.el is loaded by ~/.emacs.d behind a
+# file-exists-p guard, so it needs no placeholder.
+sway  = { template = 'sway-theme.conf.j2', target = '~/.cache/wallust/sway-theme.conf' }
+kitty = { template = 'kitty-theme.conf.j2', target = '~/.cache/wallust/kitty-theme.conf' }
+emacs = { template = 'emacs-theme.el.j2', target = '~/.cache/wallust/wallust.el' }
+mako  = { template = 'mako.conf.j2', target = '~/.cache/wallust/mako.conf' }
+
+[templated_hooks]
+# /bin/sh commands, rendered as templates first (colors, wallpaper, ...).
+# Reload sway so borders, bar and shadows pick up the new variables; make
+# mako re-read its generated config (it is started with --config on that
+# file, see sway/applications.conf); nudge the emacs daemon to re-load and
+# enable wallust.el; and pop a notification showing the palette - an 8x2
+# swatch grid image (color0-7 over color8-15) plus the hex codes as text.
+# Guarded: running from a service without SWAYSOCK, without emacs/magick,
+# or on a fresh system without a compositor must never fail the generation.
+sway = """swaymsg reload 2>/dev/null || true"""
+mako = """makoctl reload 2>/dev/null || true"""
+emacs = """emacsclient -e '(let ((f (expand-file-name "~/.cache/wallust/wallust.el"))) (when (file-exists-p f) (load f) (mapc (function disable-theme) custom-enabled-themes) (ignore-errors (enable-theme (quote wallust)))))' 2>/dev/null || true"""
+notify = """
+magick \\( -size 24x24 xc:'{{ color0 }}' -size 24x24 xc:'{{ color1 }}' -size 24x24 xc:'{{ color2 }}' -size 24x24 xc:'{{ color3 }}' -size 24x24 xc:'{{ color4 }}' -size 24x24 xc:'{{ color5 }}' -size 24x24 xc:'{{ color6 }}' -size 24x24 xc:'{{ color7 }}' +append \\) \\( -size 24x24 xc:'{{ color8 }}' -size 24x24 xc:'{{ color9 }}' -size 24x24 xc:'{{ color10 }}' -size 24x24 xc:'{{ color11 }}' -size 24x24 xc:'{{ color12 }}' -size 24x24 xc:'{{ color13 }}' -size 24x24 xc:'{{ color14 }}' -size 24x24 xc:'{{ color15 }}' +append \\) -append ~/.cache/wallust/palette.png 2>/dev/null || true
+notify-send -t 5000 -i ~/.cache/wallust/palette.png 'wallust: {{ palette }} palette from {{ wallpaper | basename }}' 'bg #000000 (pinned)   fg {{ foreground }}
+c1 {{ color1 }}   c2 {{ color2 }}   c3 {{ color3 }}   c4 {{ color4 }}
+c5 {{ color5 }}   c6 {{ color6 }}   c8 {{ color8 }}' 2>/dev/null || true
+"""

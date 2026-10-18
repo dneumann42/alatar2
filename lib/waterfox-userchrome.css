@@ -172,6 +172,13 @@
   --tabs-navbar-separator-color: transparent !important;
   --chrome-content-separator-color: var(--alatar-chrome-bg) !important;
 
+  /* Legacy aliases Firefox 153 no longer defines: Waterfox's own
+     waterfox/statusbar.css paints from --toolbar-bgcolor / --toolbar-color, and
+     an undefined var() there means no color at all, so keep the old pair wired
+     to the same knobs. */
+  --toolbar-bgcolor: var(--alatar-chrome-bg) !important;
+  --toolbar-color: var(--alatar-chrome-fg) !important;
+
   /* 3c. field tokens: the urlbar, the page search bar, the sidebar tab search
      and every moz-input. Non-focused and focused variants both, because the
      focused one is the white box. */
@@ -277,6 +284,16 @@ textarea::selection {
 .urlbarView-type-icon {
   -moz-context-properties: fill, fill-opacity;
   fill: var(--alatar-icon-fg) !important;
+}
+
+/* Bookmarks / history / synced-tabs sidebars pin their own scheme to light
+   (places_sidebar.css on .sidebar-panel[lwt-sidebar], syncedtabs_sidebar.css on
+   :root[lwt-sidebar]), which a :root rule cannot beat. Flip them so they match
+   the column; their backgrounds already resolve from --sidebar-*-color above. */
+.sidebar-panel,
+#sidebar-box,
+#sidebar {
+  color-scheme: dark !important;
 }
 
 /* ================= tabs ================= */
@@ -385,6 +402,23 @@ textarea::selection {
     --space-medium: calc((var(--alatar-vtab-width) - var(--alatar-nav-icon-size)) / 2);
     --space-small: calc((var(--alatar-vtab-width) - var(--alatar-nav-icon-size)) / 2);
     --space-xxsmall: 0px;
+    /* moz-button sizes its *box* from --button-size-icon (which sidebar-main
+       derives from --tab-min-height, so already 10px here) but the glyph
+       inside it from --icon-size - and --icon-size defaults to --icon-size-small
+       = --dimension-16. That mismatch is the clipped column: a 16px image in a
+       10px box, overflowing the 14px column and cut off by the window edge.
+       So the glyph tokens, the box tokens and the box's own border all have to
+       be pinned from this side of the shadow boundary. */
+    --icon-size: var(--alatar-icon-size);
+    --icon-size-small: var(--alatar-icon-size);
+    --icon-size-xsmall: var(--alatar-icon-size);
+    --button-size-icon: var(--alatar-nav-icon-size);
+    --button-size-icon-small: var(--alatar-nav-icon-size);
+    --button-min-height: var(--alatar-nav-icon-size);
+    --button-min-height-small: var(--alatar-nav-icon-size);
+    --button-padding-icon: 0px;
+    --button-padding: 0px;
+    --border-width: 0px; /* --button-border is var(--border-width) solid ... */
     /* moz-button / moz-input internals live in shadow trees no selector here
        can match; these are the tokens their own stylesheets read. */
     --toolbarbutton-icon-fill: var(--alatar-icon-fg) !important;
@@ -392,6 +426,10 @@ textarea::selection {
     --button-text-color: var(--alatar-chrome-fg) !important;
     --input-text-color: var(--alatar-field-fg) !important;
     --input-text-background-color: var(--alatar-field-bg) !important;
+    /* Selected rows in the column (fxview-tab-row, sidebar-tab-row.css) paint
+       AccentColor - a bright system-blue slab in an otherwise black strip. */
+    --button-background-color-primary: var(--alatar-selected-bg) !important;
+    --button-text-color-primary: var(--alatar-chrome-fg) !important;
   }
 
   #sidebar-container,

@@ -69,4 +69,16 @@ if [ ! -s "$selection" ]; then
     exit 1
 fi
 
-awww img "$(cat "$selection")"
+image="$(cat "$selection")"
+awww img "$image"
+
+# New wallpaper, new theme: wallust extracts a 16-color palette from the very
+# picture awww is now showing, renders the sway/kitty templates into
+# ~/.cache/wallust/ and reloads sway (all configured in
+# ~/.config/wallust/wallust.toml). Best-effort: a theme failure must never
+# undo the wallpaper change itself.
+if command -v wallust >/dev/null 2>&1; then
+    wallust run "$image" || echo "set-wallpaper: wallust failed, theme unchanged" >&2
+else
+    echo "set-wallpaper: wallust not on PATH, theme unchanged" >&2
+fi

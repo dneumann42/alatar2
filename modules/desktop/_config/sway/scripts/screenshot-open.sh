@@ -1,7 +1,8 @@
 #!/bin/sh
 
-# Opened from mako's right-click action on screenshot notifications
-# (see ~/.config/mako/config). $1 is the notification ID that mako
+# Opened from mako's right-click action on screenshot notifications (the
+# bindings would live in the wallust-generated mako config; template at
+# ~/.config/wallust/templates/mako.conf.j2). $1 is the notification ID that mako
 # substitutes into the exec command; the screenshot script stored the
 # matching preview path under the cache dir.
 

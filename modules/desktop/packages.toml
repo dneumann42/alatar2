@@ -78,12 +78,9 @@ name = "wmenu"
 source = "arch"
 tags = ["wayland", "launcher"]
 
-[[package]]
-name = "wallust-git"
-source = "aur"
-tags = ["wayland", "theming"]
-
-# awww is declared in the theming submodule, which owns wallpaper.service.
+# wallust and awww are declared in the theming submodule, which owns
+# wallpaper.service and the theme generation (declaring them in two places
+# breaks the install order, like every other duplicated package).
 
 [[package]]
 name = "lxqt-policykit"

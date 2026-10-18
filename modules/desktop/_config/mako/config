@@ -1,6 +1,0 @@
-# Bind left click to the notification's default action. mako resolves the
-# default action to one named "default" (default_action_names), which is what
-# downloads-watch declares for its "Move them" answer - so clicking anywhere
-# on the reminder moves the files. The button stays available as the explicit
-# path. Middle/right click keep mako's own defaults.
-on-button-left=invoke-default-action

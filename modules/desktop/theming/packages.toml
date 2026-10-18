@@ -1,3 +1,6 @@
+# This module owns the desktop theme: wallust extracts a palette from the
+# wallpaper and generates ~/.cache/wallust/*-theme.conf (config and templates
+# in desktop/_config/wallust), which sway and kitty include.
 [[package]]
 name = "wallust-git"
 source = "aur"
