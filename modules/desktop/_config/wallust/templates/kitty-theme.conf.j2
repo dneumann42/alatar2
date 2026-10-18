@@ -28,15 +28,21 @@ color13 {{ color13 }}
 color14 {{ color14 }}
 color15 {{ color15 }}
 
-cursor            {{ color4 }}
+# The `cursor` variable is wallust's own blend of the foreground with the
+# accent slot, so it stays visible on the background whatever the wallpaper
+# does; `color4` alone used to land at 1.4:1 on black.
+cursor            {{ cursor }}
 cursor_text_color #000000
 
 selection_foreground #000000
-selection_background {{ color6 }}
+selection_background {{ color6 | lighten(0.15) }}
 
 url_color {{ color6 }}
 
+# Tab backgrounds are surfaces, not tints: light text on a bare color8
+# measured 1.4-2.3:1 (see the sway template's note), so pull color8 toward
+# the pinned black instead of lightening it.
 active_tab_foreground   {{ foreground }}
-active_tab_background   {{ color8 | lighten(0.2) }}
+active_tab_background   {{ color8 | blend('#000000') | blend('#000000') }}
 inactive_tab_foreground {{ foreground | blend(color8) }}
-inactive_tab_background {{ color0 | blend(color8) }}
+inactive_tab_background {{ color0 | blend('#000000') }}

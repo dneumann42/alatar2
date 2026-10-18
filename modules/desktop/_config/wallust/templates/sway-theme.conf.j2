@@ -12,18 +12,27 @@
 # Background is pinned to black by design (wallust has no config knob for
 # it, and the salience dark anchor lands on a tinted near-black otherwise);
 # surfaces and accents below still ride the wallpaper's colors.
+# Surfaces are color8 pulled *toward* that black, never lightened off it:
+# color8 is a mid tone (~5.7:1 on black), so light text sitting on it fell
+# to 1.6:1 in the bar's active-workspace pill and in the emacs mode-line.
+# Two blends toward #000000 keep the wallpaper's tint at 1.2-1.4:1 over the
+# background and lift text-on-surface to 6:1 and up.
 set $background   #000000
-set $background2  {{ color0 | blend(color8) }}
-set $surface      {{ color8 }}
-set $surface_alt  {{ color8 | lighten(0.2) }}
+set $background2  {{ color0 | blend('#000000') }}
+set $surface      {{ color8 | blend('#000000') | blend('#000000') }}
+set $surface_alt  {{ color8 | blend('#000000') }}
 set $text         {{ foreground }}
 set $muted        {{ foreground | blend(color8) }}
 # Accents ride the image's own hues (salience makes no red/blue promises);
-# urgent stays the repo's fixed red so it always reads as alarming.
+# urgent stays the repo's fixed red so it always reads as alarming. With
+# sampling=high + check_contrast in the config these land above 4:1 on
+# black, so the focused-workspace pill ($bar_flat text on $accent) reads.
 set $accent       {{ color4 }}
-set $accent2      {{ color2 | lighten(0.1) }}
+set $accent2      {{ color2 | lighten(0.15) }}
 set $urgent       #f38ba8
-set $inactive     {{ color8 }}
+# Unfocused borders and the bar separator: one blend short of a surface -
+# dimmer than anything text-bearing, still visible against the background.
+set $inactive     {{ color8 | blend('#000000') }}
 
 # Bar: $bar_bg is the bar window background with the config's alpha (wallpaper
 # shows through), $bar_flat fills the active workspace pill. The alpha byte is

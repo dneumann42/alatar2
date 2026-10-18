@@ -1,0 +1,6 @@
+# The directory must exist for OpenCode to find its themes, but its content
+# is generated: wallust renders wallust.json in here on every wallpaper
+# change (see wallust.toml [templates]; the source of truth is the
+# templates/opencode-theme.json.j2 file in the repo).
+*
+!.gitignore

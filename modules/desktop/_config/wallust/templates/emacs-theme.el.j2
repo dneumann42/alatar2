@@ -13,8 +13,22 @@
       ;; templates); everything else rides the wallpaper palette.
       (bg      "#000000")
       (fg      "{{ foreground }}")
-      (black   "{{ color0 }}")
-      (grey    "{{ color8 }}")
+      ;; color0 is the palette's dark anchor, but "dark" is relative - it
+      ;; lands anywhere from 1.05:1 to 2.06:1 against the pinned black, so
+      ;; dim grey text on it can end up at ~1.2:1 (mode-line-inactive).
+      ;; Pulling it halfway to black keeps it a tinted raised surface.
+      (black   "{{ color0 | blend('#000000') }}")
+      ;; lighten(0.1): raw color8 sits at 4.05:1 on black at worst, just under
+      ;; the AA text floor for the comment face; this lands it at 4.74 while
+      ;; staying clearly dimmer than the foreground (7.15+).
+      (grey    "{{ color8 | lighten(0.1) }}")
+      ;; `grey` (color8) is a mid tone: right as a dim *foreground*
+      ;; (comments, borders, glyphs) but useless as a *background* - the
+      ;; light foreground on bare color8 sat at 1.6:1, and color0 against the
+      ;; pinned black was invisible (1.05:1). `surf` is the color8 tint
+      ;; pulled toward that black: still reads as wallpaper-colored, keeps
+      ;; text on it above 6:1. Same math as the sway template's surfaces.
+      (surf    "{{ color8 | blend('#000000') | blend('#000000') }}")
       (white   "{{ color7 }}")
       ;; The salience palette gathers the image's prominent colors - these
       ;; carry its hues, with no red/blue role promise (that's what makes
@@ -41,16 +55,16 @@
    `(border               ((t (:background ,bg))))
    `(vertical-border      ((t (:foreground ,grey))))
    `(window-divider       ((t (:foreground ,grey))))
-   `(mode-line            ((t (:background ,grey :foreground ,fg :box nil))))
+   `(mode-line            ((t (:background ,surf :foreground ,fg :box nil))))
    `(mode-line-inactive   ((t (:background ,black :foreground ,grey :box nil))))
    `(mode-line-buffer-id  ((t (:weight bold :foreground ,acc3))))
-   `(region               ((t (:background ,grey))))
-   `(secondary-region     ((t (:background ,grey))))
-   `(highlight            ((t (:background ,black))))
-   `(hl-line              ((t (:background ,black))))
+   `(region               ((t (:background ,surf))))
+   `(secondary-region     ((t (:background ,surf))))
+   `(highlight            ((t (:background ,surf))))
+   `(hl-line              ((t (:background ,surf))))
    `(isearch              ((t (:background ,warn :foreground ,bg))))
    `(isearch-fail         ((t (:background ,err :foreground ,bg))))
-   `(lazy-highlight       ((t (:background ,grey :foreground ,fg))))
+   `(lazy-highlight       ((t (:background ,surf :foreground ,fg))))
    `(link                 ((t (:foreground ,acc6 :underline t))))
    `(link-visited         ((t (:foreground ,acc5 :underline t))))
    `(success              ((t (:foreground ,ok :weight bold))))

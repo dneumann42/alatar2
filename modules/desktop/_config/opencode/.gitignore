@@ -1,0 +1,4 @@
+# This directory is alatar-symlinked to ~/.config/opencode (desktop/dotfiles),
+# so anything opencode or wallust writes at runtime lands here too - keep the
+# repo clean; the checked-in files are the dotfiles, the rest is machine state.
+service.json
