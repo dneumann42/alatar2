@@ -27,11 +27,11 @@ font_size = 11                         # pt
 foreground       = "#9aa4b2"           # $muted
 hover_foreground = "#e6eaf2"           # $text
 
-# --- far left: nomicron ---
+# --- far left: nomicon ---
 [[button]]
 side    = "left"
-icon    = "nomicron-small.png"
-command = "notify-send Nomicron 'The nomicron calls to you.'"
+icon    = "nomicon-small.png"
+command = "sh $HOME/.config/sway/scripts/nomicon.sh"
 
 # --- left, right of the nomicron: gear ---
 [[button]]

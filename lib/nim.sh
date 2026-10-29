@@ -10,7 +10,7 @@
 #   bash lib/nim.sh
 #
 # Configuration (set in .env or the environment before sourcing):
-#   NIM_VERSION    pinned Nim version    (default: 2.2.12)
+#   NIM_VERSION    pinned Nim version    (default: 2.4.0)
 #   NIM_URL        override download URL (default: official pre-built tarball)
 #   ALATAR_HOME    alatar data dir       (default: ~/.alatar)
 #   NIM_SETUP_DIR  toolchain dir         (default: ~/.local/share/nim)
@@ -20,7 +20,7 @@
 # PATH is also persisted to common shell RC files so new shells can find nim.
 
 ALATAR_HOME="${ALATAR_HOME:-$HOME/.alatar}"
-NIM_VERSION="${NIM_VERSION:-2.2.12}"
+NIM_VERSION="${NIM_VERSION:-2.4.0}"
 NIM_SETUP_DIR="${NIM_SETUP_DIR:-$HOME/.local/share/nim}"
 NIM_USER_BIN="${NIM_USER_BIN:-$HOME/.local/bin}"
 NIM_URL="${NIM_URL:-https://nim-lang.org/download/nim-${NIM_VERSION}-linux_x64.tar.xz}"

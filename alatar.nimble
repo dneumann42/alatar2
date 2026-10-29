@@ -8,4 +8,4 @@ srcDir        = "src"
 bin           = @["alatar"]
 binDir        = "bin/"
 
-requires "nim >= 2.2.10", "parsetoml", "cligen", "regex"
+requires "nim >= 2.4.0", "parsetoml", "cligen", "regex"
