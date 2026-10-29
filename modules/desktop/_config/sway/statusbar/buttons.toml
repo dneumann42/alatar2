@@ -22,7 +22,7 @@ icon_height  = 16        # px — rendered icon height (aspect ratio kept)
 background       = "#000000"   # $bar_bg so buttons blend into the bar
 hover_background = "#1c1f26"
 
-font      = "AtkynsonMono Nerd Font"   # glyph buttons, same as the bar
+font      = "JetBrainsMono Nerd Font"   # glyph buttons, same as the bar
 font_size = 11                         # pt
 foreground       = "#9aa4b2"           # $muted
 hover_foreground = "#e6eaf2"           # $text

@@ -1,6 +1,6 @@
 # ============================================================================
 # Palette, glyphs, and shared constants.
-# Icons are Font Awesome 5 glyphs (present in the AtkynsonMono Nerd Font the
+# Icons are Font Awesome 5 glyphs (present in the JetBrainsMono Nerd Font the
 # bar uses). Colors mirror appearance.conf — keep in sync.
 # ============================================================================
 

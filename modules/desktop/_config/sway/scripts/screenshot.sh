@@ -7,8 +7,10 @@ set -eu
 # its image-path hint, which requires a file, so each capture is written to
 # a preview file under the cache dir (pruned after a day).
 
+# Fixed compact width: the config's 70% is resolved against GDK's
+# unrotated geometry and overflows the portrait display (see wofi.sh).
 choice=$(printf 'monitor\nregion\n' |
-    wofi --dmenu --prompt 'Screenshot') || true
+    wofi --dmenu --width 500 --prompt 'Screenshot') || true
 [ -n "$choice" ] || exit 0
 
 preview_dir="${XDG_CACHE_HOME:-$HOME/.cache}/mako-screenshots"

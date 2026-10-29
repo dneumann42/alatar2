@@ -68,7 +68,7 @@ proc parseConfig(path: string): Settings =
     barHeight:   root.optInt("bar_height", 20),     # sync: bar.conf `height`
     buttonWidth: root.optInt("button_width", 24),   # sync: bar.conf `gaps`
     iconHeight:  root.optInt("icon_height", 16),
-    font:        root.optStr("font", "AtkynsonMono Nerd Font"),
+    font:        root.optStr("font", "JetBrainsMono Nerd Font"),
     fontSize:    root.optInt("font_size", 11),
     bg:          root.optStr("background", "#000000"),
     bgHover:     root.optStr("hover_background", "#1c1f26"),

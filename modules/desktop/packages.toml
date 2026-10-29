@@ -571,6 +571,11 @@ source = "arch"
 tags = ["fonts"]
 
 [[package]]
+name = "ttf-jetbrains-mono-nerd"
+source = "arch"
+tags = ["fonts"]
+
+[[package]]
 name = "ttf-nerd-fonts-symbols"
 source = "arch"
 tags = ["fonts"]
