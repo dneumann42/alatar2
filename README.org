@@ -48,8 +48,20 @@ notification listing the out-of-place files with a "Move them" default
 action - its button or a left click on the notification (mako's
 `on-button-left` binding, shipped in `desktop/_config`) runs the tidy over
 the directory, and a second notification reports the result. Dismiss or
-expiry leaves the files alone until the next trigger. `alatar tidy --ask`
-is the same question in a terminal. The rules file defaults to
+expiry leaves the files alone until the next trigger. AppImages are asked
+about first, outside tidy.toml: a separate notification lists every
+`*.AppImage` (case-insensitive) directly in Downloads, and its "Move them"
+answer moves the files to `~/.local/bin` (override: `APPIMAGE_DIR`), then
+runs `alatar appimages` over it - so each ends up executable, one shell word
+from running, and listed by wofi.
+`alatar tidy --ask`
+is the same question in a terminal. `alatar appimages [DIR...]` keeps an
+AppImage home launchable: for every `*.AppImage` directly in DIR (default:
+`$APPIMAGE_DIR`, else `~/.local/bin`) it sets the execute bit and, when no
+`.desktop` entry references the file, writes one from the desktop file and
+icon the AppImage carries into `$XDG_DATA_HOME/applications` and the hicolor
+icon theme. `--dry` only lists un-integrated AppImages and exits 1. The
+rules file defaults to
 `$XDG_CONFIG_HOME/alatar/tidy.toml` (override: `ALATAR_TIDY_CONFIG`); the
 `directories` module ships a starter ruleset linked to exactly that path,
 so the rules live in the repo like every other config and edits take

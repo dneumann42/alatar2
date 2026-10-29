@@ -1,7 +1,7 @@
 import std/[os, strutils, sequtils]
 import terminal
 
-import alatar/[fs, modules, packages, repos, services, symlinks, tidy]
+import alatar/[appimages, fs, modules, packages, repos, services, symlinks, tidy]
 
 import cligen
 
@@ -237,6 +237,29 @@ proc cmdTidy(targets: seq[string], config = defaultTidyConfig(),
   except TidyError as e:
     quit "alatar: " & e.msg, 1
 
+proc cmdAppImages(dirs: seq[string], dry = false) =
+  ## Ensure every AppImage in a directory can be launched from the desktop:
+  ## chmod +x the ones that lack the execute bit and create the missing
+  ## .desktop entries (extracted from the AppImages themselves, icons
+  ## included), which is what wofi and friends list. Default DIR is the
+  ## AppImage home.
+  var targets = dirs
+  if targets.len == 0:
+    targets = @[appImageHome()]
+  var broken = 0
+  for dir in targets:
+    try:
+      broken += integrateDir(dir, dry)
+    except AppImageError as e:
+      quit "alatar: " & e.msg, 1
+    except CatchableError as e:
+      quit "alatar: " & e.msg, 1
+  if broken == 0:
+    echo "every AppImage integrated."
+    return
+  if dry:
+    quit 1
+
 proc start*() {.raises: [].} =
   try:
     dispatchMulti(
@@ -255,7 +278,14 @@ proc start*() {.raises: [].} =
                 "$XDG_CONFIG_HOME/alatar/tidy.toml]",
                 "dry": "list misplaced files and exit 1, move nothing",
                 "ask": "confirm every move with y/N",
-                "recursive": "sort files in subdirectories too"}))
+                "recursive": "sort files in subdirectories too"}),
+       (cmdAppImages, cmdName = "appimages", positional = "dirs",
+        doc = "Make the AppImages in DIR launchable from wofi: chmod +x and " &
+          "create missing .desktop entries; --dry reports (exit 1 if any) " &
+          "and fixes nothing.",
+        help = {"dirs": "AppImage directories [env: APPIMAGE_DIR; default: " &
+                 "~/.local/bin]",
+                 "dry": "list un-integrated AppImages and exit 1, fix nothing"}))
   except:
     quit "alatar: " & getCurrentExceptionMsg(), 1
 

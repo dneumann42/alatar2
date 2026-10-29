@@ -1,0 +1,14 @@
+{
+  "instructions": [
+    "/home/dneumann/.config/opencode/AGENTS.caveman.md"
+  ],
+  "permission": {
+    "skill": {
+      "caveman": "allow",
+      "caveman-commit": "allow",
+      "caveman-review": "allow",
+      "caveman-help": "allow",
+      "caveman-compress": "allow"
+    }
+  }
+}

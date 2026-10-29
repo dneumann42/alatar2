@@ -1,5 +1,5 @@
 [Unit]
-Description=Ask about out-of-place files in Downloads (alatar tidy --dry + mako)
+Description=Ask about AppImages and out-of-place files in Downloads (mako + alatar tidy)
 # Session service, not a login service: the reminder is a mako notification,
 # so outside a Wayland session there is nobody to ask. Same guard as
 # wallpaper.service: the condition fails cleanly and the timer tick is a
