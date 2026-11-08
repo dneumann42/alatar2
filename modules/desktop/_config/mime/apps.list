@@ -1,0 +1,44 @@
+# Default applications for xdg-open / MIME dispatch.
+# Managed by the alatar desktop module. Desktop ids must match files in
+# /usr/share/applications or ~/.local/share/applications (run `ls` to check).
+# _config/mime/apps.list is merged into ~/.config/mimeapps.list by
+# xdg-mime-sync.service, not symlinked onto it directly: a symlink would make
+# every manual `xdg-mime set` write through to the module and lose the merge.
+
+[Default Applications]
+# documents
+application/pdf=org.pwmt.zathura-pdf-mupdf.desktop
+text/plain=kitty.desktop
+application/epub+zip=calibre-ebook-viewer.desktop
+application/x-mobipocket-ebook=calibre-ebook-viewer.desktop
+application/vnd.amazon.ebook=calibre-ebook-viewer.desktop
+
+# web
+x-scheme-handler/http=waterfox.desktop
+x-scheme-handler/https=waterfox.desktop
+text/html=waterfox.desktop
+x-scheme-handler/jetbrains=jetbrainsd.desktop
+
+# images
+image/jpeg=swayimg.desktop
+image/png=swayimg.desktop
+image/gif=swayimg.desktop
+image/webp=swayimg.desktop
+image/bmp=swayimg.desktop
+
+# audio / video
+audio/*=mpv.desktop
+video/*=mpv.desktop
+
+# files
+inode/directory=pcmanfm-qt.desktop
+application/x-desktop=kitty.desktop
+
+# archives
+application/zip=kitty.desktop
+application/gzip=kitty.desktop
+application/x-bzip2=kitty.desktop
+application/x-xz=kitty.desktop
+application/x-7z-compressed=kitty.desktop
+application/x-tar=kitty.desktop
+application/zstd=kitty.desktop

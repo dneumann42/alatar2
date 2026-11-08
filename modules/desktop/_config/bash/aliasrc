@@ -1,0 +1,14 @@
+alias e="emacs"
+
+alias ls="ls -ACh"
+alias ll="ls -lAh"
+alias ..="cd .."
+alias ...="cd ../.."
+
+alias gs="git status"
+alias gc="git commit"
+alias ga="git add"
+alias update="paru -Syu"
+
+alias o="xdg-open"
+alias tree="find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'"

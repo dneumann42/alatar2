@@ -31,13 +31,13 @@ hover_foreground = "#e6eaf2"           # $text
 [[button]]
 side    = "left"
 icon    = "nomicon-small.png"
-command = "sh $HOME/.config/sway/scripts/nomicon.sh"
+command = "notify-send Settings 'You clicked the gear.'"
 
 # --- left, right of the nomicron: gear ---
 [[button]]
 side    = "left"
 glyph   = "\uf013"          # fa-cog, from the Nerd Font
-command = "notify-send Settings 'You clicked the gear.'"
+command = "sh $HOME/.config/sway/scripts/nomicon.sh"
 
 # --- right: NIRSS TUI in a floating kitty (floats via window-rules.conf) ---
 [[button]]

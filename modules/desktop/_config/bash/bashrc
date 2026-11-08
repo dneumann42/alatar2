@@ -1,0 +1,64 @@
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+
+[[ -f "$XDG_CONFIG_HOME/bash/aliasrc" ]] && source "$XDG_CONFIG_HOME/bash/aliasrc"
+[[ -f "$XDG_CONFIG_HOME/bash/pathrc" ]] && source "$XDG_CONFIG_HOME/bash/pathrc"
+
+export HISTCONTROL=erasedups:ignoredups:ignorespace
+export HISTSIZE=5000
+export HISTFILESIZE=10000
+
+shopt -s histappend
+PROMPT_COMMAND="history -a"
+
+shopt -s checkwinsize
+stty -ixon
+
+shopt -s extglob
+shopt -s expand_aliases
+shopt -s dotglob
+shopt -s histreedit
+shopt -s histverify
+shopt -s autocd
+shopt -s cdable_vars
+shopt -s cdspell
+shopt -s cmdhist
+shopt -s nocaseglob
+
+bind '"\e[A":history-search-backward' 
+bind '"\e[B":history-search-forward'
+bind '"\e[5~":beginning-of-history'
+bind '"\e[5~":end-of-history'
+bind 'set completion-ignore-case on'
+
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+	. /usr/share/bash-completion/bash_completion
+elif [ -f /etc/bash_completion ]; then
+	. /etc/bash_completion
+fi
+
+# Disable bell
+if [[ $iatest > 0 ]]; then bind "set bell-style visible"; fi
+
+# ignore case
+if [[ $iatest > 0 ]]; then bind "set completion-ignore-case on"; fi
+
+export EDITOR=emacs
+export VISUAL=emacs
+
+export VK_ICD_FILENAMES="/usr/share/vulkan/icd.d/nvidia_icd.json"
+
+export LESS_TERMCAP_mb=$'\e[1;32m'
+export LESS_TERMCAP_md=$'\e[1;32m'
+export LESS_TERMCAP_me=$'\e[0m'
+export LESS_TERMCAP_se=$'\e[0m'
+export LESS_TERMCAP_so=$'\e[01;33m'
+export LESS_TERMCAP_ue=$'\e[0m'
+export LESS_TERMCAP_us=$'\e[1;4;31m'
+
+parse_git_branch() {
+    git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+}
+
+PS1='\[\e[32m\]\u@\h\[\e[0m\] \[\e[34m\]\w\[\e[0m\] $(parse_git_branch) \n\$ '

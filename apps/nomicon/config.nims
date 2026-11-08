@@ -8,6 +8,8 @@
 # resolves - the one installed at the revision nomicon.nimble pins.
 import std/[os, strutils]
 
+switch("path", getEnv("ALATAR_SRC", getEnv("HOME", "/root") / ".alatar" / "src"))
+
 const ellipsePinned = "03fa577e00cc61c25b97d604e86d72084ce728b9"
 
 let nimbleDir = getEnv("NIMBLE_DIR", getEnv("HOME", "/root") / ".nimble") / "pkgs2"

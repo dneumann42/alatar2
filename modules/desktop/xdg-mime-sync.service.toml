@@ -1,0 +1,15 @@
+[Unit]
+Description=Publish alatar's MIME defaults to mimeapps.list (xdg-open handlers)
+Documentation=file://%h/.config/mime/apps.list
+# Session service like wallpaper.service: `alatar install` normally runs on a
+# TTY, where writing ~/.config is fine but pointless until sway is up. The
+# real guarantee comes from sway's exec_always hook; this unit exists so the
+# sync also happens on plain session start and shows up in systemctl status.
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=oneshot
+ExecStart=%h/.config/sway/scripts/xdg-mime-sync.sh
+
+[Install]
+WantedBy=sway-session.target

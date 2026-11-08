@@ -1,2 +1,9 @@
 ["desktop/_config/(.*)"]
 to = "$XDG_CONFIG_HOME/$1"
+
+["desktop/bash/profile"]
+to = "$HOME/.profile"
+
+["desktop/_config/bash/bashrc"]
+to = "$HOME/.bashrc"
+

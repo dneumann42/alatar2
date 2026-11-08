@@ -1,7 +1,7 @@
 import std/[os, strutils, sequtils]
 import terminal
 
-import alatar/[appimages, fs, modules, packages, repos, services, symlinks, tidy]
+import alatar/[appimages, controls, fs, modules, packages, repos, services, symlinks, tidy]
 
 import cligen
 
@@ -260,6 +260,141 @@ proc cmdAppImages(dirs: seq[string], dry = false) =
   if dry:
     quit 1
 
+template withControls(body: untyped) =
+  try:
+    body
+  except ControlError as e:
+    quit "alatar: " & e.msg, 1
+
+proc stepArg(arguments: seq[string], index: int, default: int): int =
+  if arguments.len > index and arguments[index].len > 0:
+    try: return parseInt(arguments[index])
+    except ValueError: discard
+  default
+
+proc reportNode(node: AudioNode) =
+  echo (if node.preferred: "* " else: "  "), node.description, "  ",
+    node.volume, "%", (if node.muted: " muted" else: ""), "  ", node.name
+
+proc cmdAudioNode(node: AudioNode, arguments: seq[string]) =
+  let sameKind = if node.kind == sink: sinks() else: sources()
+  if arguments.len == 0:
+    for device in sameKind:
+      if device.name == node.name:
+        echo device.volume, "%", (if device.muted: " muted" else: ""), "  ",
+          device.description
+        return
+    return
+  case arguments[0]
+  of "status": cmdAudioNode(node, @[])
+  of "up":
+    nudgeVolume(node, stepArg(arguments, 1, 5))
+    cmdAudioNode(node, @[])
+  of "down":
+    nudgeVolume(node, -stepArg(arguments, 1, 5))
+    cmdAudioNode(node, @[])
+  of "set":
+    setVolume(node, stepArg(arguments, 1, 0))
+    cmdAudioNode(node, @[])
+  of "mute":
+    setMuted(node, true)
+    cmdAudioNode(node, @[])
+  of "unmute":
+    setMuted(node, false)
+    cmdAudioNode(node, @[])
+  of "toggle": echo (if toggleMuted(node): "muted" else: "unmuted")
+  of "devices":
+    for device in sameKind:
+      reportNode(device)
+  of "use":
+    if arguments.len < 2: quit "alatar: use needs a device name", 2
+    for device in sameKind:
+      if device.name == arguments[1] or device.description == arguments[1]:
+        setPreferred(device)
+        echo "default ", $device.kind, ": ", device.description
+        return
+    quit "alatar: no audio device '" & arguments[1] & "'", 1
+  else: quit "alatar: unknown audio verb '" & arguments[0] & "'", 2
+
+proc cmdSound(arguments: seq[string]) =
+  ## Control the default audio output (sink).
+  withControls:
+    cmdAudioNode(defaultSink(), arguments)
+
+proc cmdMic(arguments: seq[string]) =
+  ## Control the default audio input (source).
+  withControls:
+    cmdAudioNode(defaultSource(), arguments)
+
+proc cmdWifi(arguments: seq[string]) =
+  ## Control the Wi-Fi radio and connections.
+  withControls:
+    let action = if arguments.len > 0: arguments[0] else: "status"
+    case action
+    of "status":
+      if not wifiEnabled():
+        echo "Wi-Fi is off"; return
+      for network in wifiNetworks():
+        if network.connected:
+          echo "connected to ", network.ssid, " (", network.signal, "%)"
+          return
+      echo "Wi-Fi is on, not connected"
+    of "on", "off":
+      setWifiEnabled(action == "on")
+    of "toggle":
+      setWifiEnabled(not wifiEnabled())
+    of "networks":
+      for network in wifiNetworks():
+        echo (if network.connected: "* " else: "  "), network.ssid, "  ",
+          network.signal, "%"
+    of "connect":
+      if arguments.len < 2: quit "alatar: connect needs an SSID", 2
+      connectWifi(arguments[1 .. ^1].join(" "))
+    else: quit "alatar: unknown wifi verb '" & action & "'", 2
+
+proc cmdWired(arguments: seq[string]) =
+  ## Control the wired connection.
+  withControls:
+    let action = if arguments.len > 0: arguments[0] else: "status"
+    case action
+    of "status":
+      let connection = wiredConnection()
+      if connection.device.len == 0: echo "No wired device"
+      elif connection.name.len > 0: echo "connected: ", connection.name
+      else: echo "disconnected: ", connection.device
+    of "on", "off":
+      setWiredEnabled(action == "on")
+    of "toggle":
+      setWiredEnabled(wiredConnection().name.len == 0)
+    else: quit "alatar: unknown wired verb '" & action & "'", 2
+
+proc cmdBluetooth(arguments: seq[string]) =
+  ## Control the Bluetooth adapter and devices.
+  withControls:
+    let action = if arguments.len > 0: arguments[0] else: "status"
+    case action
+    of "status":
+      if not bluetoothAvailable():
+        echo "Bluetooth daemon is not running"
+      elif bluetoothEnabled():
+        echo "Bluetooth is on"
+      else:
+        echo "Bluetooth is off"
+    of "on", "off":
+      setBluetoothEnabled(action == "on")
+    of "toggle":
+      setBluetoothEnabled(not bluetoothEnabled())
+    of "devices":
+      for device in bluetoothDevices():
+        echo (if device.connected: "* " else: "  "), device.name, "  ",
+          device.address, (if device.battery > 0: "  " & $device.battery & "%"
+                           else: "")
+    of "connect", "disconnect":
+      if arguments.len < 2: quit "alatar: " & action & " needs an address", 2
+      if action == "connect": connectBluetooth(arguments[1])
+      else: disconnectBluetooth(arguments[1])
+    else: quit "alatar: unknown bluetooth verb '" & action & "'", 2
+
 proc start*() {.raises: [].} =
   try:
     dispatchMulti(
@@ -285,7 +420,28 @@ proc start*() {.raises: [].} =
           "and fixes nothing.",
         help = {"dirs": "AppImage directories [env: APPIMAGE_DIR; default: " &
                  "~/.local/bin]",
-                 "dry": "list un-integrated AppImages and exit 1, fix nothing"}))
+                 "dry": "list un-integrated AppImages and exit 1, fix nothing"}),
+      (cmdSound, cmdName = "sound", positional = "arguments",
+       doc = "Control the default audio output: [status] | up|down [STEP] | " &
+         "set N | mute|unmute|toggle | devices | use NAME.",
+       help = {"arguments": "verb plus optional parameter, e.g. 'up 10'"}),
+      (cmdMic, cmdName = "mic", positional = "arguments",
+       doc = "Control the default audio input: [status] | up|down [STEP] | " &
+         "set N | mute|unmute|toggle | devices.",
+       help = {"arguments": "verb plus optional parameter, e.g. 'mute'"}),
+      (cmdWifi, cmdName = "wifi", positional = "arguments",
+       doc = "Control Wi-Fi: [status] | on|off|toggle | networks | " &
+         "connect SSID...",
+       help = {"arguments": "verb plus optional parameter, e.g. " &
+                "'connect My Network'"}),
+      (cmdWired, cmdName = "wired", positional = "arguments",
+       doc = "Control the wired connection: [status] | on|off|toggle.",
+       help = {"arguments": "verb, e.g. 'off'"}),
+      (cmdBluetooth, cmdName = "bluetooth", positional = "arguments",
+       doc = "Control Bluetooth: [status] | on|off|toggle | devices | " &
+         "connect|disconnect ADDRESS.",
+       help = {"arguments": "verb plus optional parameter, e.g. " &
+                "'connect 80:EA:9C:00:00:00'"}))
   except:
     quit "alatar: " & getCurrentExceptionMsg(), 1
 
