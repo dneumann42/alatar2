@@ -31,68 +31,13 @@ proc note(s: State) =
   if s.note.len > 0:
     caption(s.note)
 
-proc toggleGrid(s: State) =
-  clay "grid", col(width = grow(), gap = 8):
-    clay "grid.net", row(width = grow(), gap = 8):
-      service(s, "wifi", "Wi-Fi", s.wifiSubtitle, s.wifiOn, panelWifi,
-              toggleWifi)
-      service(s, "wired", "Wired", s.wiredSubtitle, s.wiredOn, panelWired,
-              toggleWired)
-    clay "grid.sys", row(width = grow(), gap = 8):
-      service(s, "bt", "Bluetooth", s.btSubtitle, s.btOn, panelBluetooth,
-              toggleBluetooth)
-      service(s, "power", "Power Mode", powerLabel(s.powerMode),
-              s.powerMode != pmBalanced, panelPower, togglePower)
-    clay "grid.light", row(width = grow(), gap = 8):
-      plain(s, "night", "Night Light",
-            if s.nightLight: "On" else: "Off", s.nightLight,
-            toggleNightLight)
-      plain(s, "dark", "Dark Style",
-            if s.darkStyle: "On" else: "Off", s.darkStyle, toggleDarkStyle)
-    clay "grid.misc", row(width = grow(), gap = 8):
-      plain(s, "airplane", "Airplane Mode",
-            if s.airplane: "On" else: "Off", s.airplane, toggleAirplane)
-      plain(s, "backlight", "Keyboard", s.backlightLabel,
-            s.backlight > 0, cycleBacklight)
-      plain(s, "monitor", "Monitor Mode", s.monitorSubtitle,
-            s.monitorOn, toggleMonitor)
-      plain(s, "wallpaper", "Wallpaper", "Shift+Super+W", false,
-            switchWallpaper)
-
-proc brightnessRow(s: State) =
-  clay "bright", row(width = grow(), gap = 6, alignY = centerY):
-    clay "bright.label", col(width = fixedPx(140)):
-      caption("Brightness")
-    s.brightness = slider(hashId("bright.slider"), s.brightness).value
-
-proc audioRows(s: State) =
-  clay "audio", col(width = grow(), gap = 8):
-    clay "audio.out", row(width = grow(), gap = 6, alignY = centerY):
-      service(s, "sound", "Sound", s.sinkSubtitle,
-              not s.defaultSink.muted, panelOutput, toggleMute,
-              width = fixedPx(140))
-      let volume = slider(hashId("sound.slider"), s.volumeUi,
-                          dimmed = s.defaultSink.muted)
-      s.volumeUi = volume.value
-      if volume.committed:
-        s.setSinkVolume(volume.value)
-    clay "audio.in", row(width = grow(), gap = 6, alignY = centerY):
-      service(s, "mic", "Input", s.micSubtitle,
-              not s.defaultSource.muted, panelInput, toggleMicMute,
-              width = fixedPx(140))
-      let mic = slider(hashId("mic.slider"), s.micUi,
-                       dimmed = s.defaultSource.muted)
-      s.micUi = mic.value
-      if mic.committed:
-        s.setMicVolume(mic.value)
-
 proc reopenBackground(s: State) =
   s.setPanel(panelBackground)
 
-proc backgroundRow(s: State) =
-  service(s, "background", "Background",
-          $s.background.len & (if s.background.len == 1: " App" else: " Apps"),
-          s.panel == panelBackground, panelBackground, reopenBackground)
+## The disclosure cards open inline, directly under the row whose button
+## was expanded (see `toggleGrid`, `audioRows`, `backgroundRow`), so the
+## panel belongs to the control it came from instead of one fixed spot at
+## the foot of the grid.
 
 proc panelCard(s: State) =
   case s.panel
@@ -169,19 +114,83 @@ proc panelCard(s: State) =
   of panelNone:
     discard
 
+proc toggleGrid(s: State) =
+  clay "grid", col(width = grow(), gap = 8):
+    clay "grid.net", row(width = grow(), gap = 8):
+      service(s, "wifi", "Wi-Fi", s.wifiSubtitle, s.wifiOn, panelWifi,
+              toggleWifi)
+      service(s, "wired", "Wired", s.wiredSubtitle, s.wiredOn, panelWired,
+              toggleWired)
+    if s.panel in {panelWifi, panelWired}:
+      panelCard(s)
+    clay "grid.sys", row(width = grow(), gap = 8):
+      service(s, "bt", "Bluetooth", s.btSubtitle, s.btOn, panelBluetooth,
+              toggleBluetooth)
+      service(s, "power", "Power Mode", powerLabel(s.powerMode),
+              s.powerMode != pmBalanced, panelPower, togglePower)
+    if s.panel in {panelBluetooth, panelPower}:
+      panelCard(s)
+    clay "grid.light", row(width = grow(), gap = 8):
+      plain(s, "night", "Night Light",
+            if s.nightLight: "On" else: "Off", s.nightLight,
+            toggleNightLight)
+      plain(s, "dark", "Dark Style",
+            if s.darkStyle: "On" else: "Off", s.darkStyle, toggleDarkStyle)
+    clay "grid.misc", row(width = grow(), gap = 8):
+      plain(s, "airplane", "Airplane Mode",
+            if s.airplane: "On" else: "Off", s.airplane, toggleAirplane)
+      plain(s, "backlight", "Keyboard", s.backlightLabel,
+            s.backlight > 0, cycleBacklight)
+      plain(s, "monitor", "Monitor Mode", s.monitorSubtitle,
+            s.monitorOn, toggleMonitor)
+      plain(s, "wallpaper", "Wallpaper", "Shift+Super+W", false,
+            switchWallpaper)
+
+proc brightnessRow(s: State) =
+  clay "bright", row(width = grow(), gap = 6, alignY = centerY):
+    clay "bright.label", col(width = fixedPx(140)):
+      caption("Brightness")
+    s.brightness = slider(hashId("bright.slider"), s.brightness).value
+
+proc audioRows(s: State) =
+  clay "audio", col(width = grow(), gap = 8):
+    clay "audio.out", row(width = grow(), gap = 6, alignY = centerY):
+      service(s, "sound", "Sound", s.sinkSubtitle,
+              not s.defaultSink.muted, panelOutput, toggleMute,
+              width = fixedPx(140))
+      let volume = slider(hashId("sound.slider"), s.volumeUi,
+                          dimmed = s.defaultSink.muted)
+      s.volumeUi = volume.value
+      if volume.committed:
+        s.setSinkVolume(volume.value)
+    if s.panel == panelOutput:
+      panelCard(s)
+    clay "audio.in", row(width = grow(), gap = 6, alignY = centerY):
+      service(s, "mic", "Input", s.micSubtitle,
+              not s.defaultSource.muted, panelInput, toggleMicMute,
+              width = fixedPx(140))
+      let mic = slider(hashId("mic.slider"), s.micUi,
+                       dimmed = s.defaultSource.muted)
+      s.micUi = mic.value
+      if mic.committed:
+        s.setMicVolume(mic.value)
+    if s.panel == panelInput:
+      panelCard(s)
+
+proc backgroundRow(s: State) =
+  service(s, "background", "Background",
+          $s.background.len & (if s.background.len == 1: " App" else: " Apps"),
+          s.panel == panelBackground, panelBackground, reopenBackground)
+  if s.panel == panelBackground:
+    panelCard(s)
+
 proc render*(s: State) =
   clay "menu", col(width = grow(), height = grow(), padding = padAll(12),
       gap = 8)
       .clip(horizontal = false, vertical = true,
             childOffset = currentScrollOffset()):
     toggleGrid(s)
-    if s.panel in {panelWifi, panelWired, panelBluetooth, panelPower}:
-      panelCard(s)
     brightnessRow(s)
     audioRows(s)
-    if s.panel in {panelOutput, panelInput}:
-      panelCard(s)
     backgroundRow(s)
-    if s.panel == panelBackground:
-      panelCard(s)
     scrollbar(hashId("menu.bar"), hashId("menu"))

@@ -8,7 +8,7 @@ proc prepare() =
   actions.refreshAll(screen)
 
 proc view() =
-  setTheme(gnomeTheme(screen.darkStyle))
+  setTheme(gothicTheme(screen.darkStyle))
   render(screen)
 
 when isMainModule:

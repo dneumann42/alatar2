@@ -23,3 +23,7 @@ content = "# wallust: no theme generated yet - kitty keeps the kitty.conf defaul
 [[file]]
 path = "~/.cache/wallust/mako.conf"
 content = "# wallust: no theme generated yet - mako keeps its built-in defaults\n"
+
+[[file]]
+path = "~/.cache/wallust/nomicon-theme.conf"
+content = "# wallust: no theme generated yet - nomicon keeps its built-in gothic palette\n"

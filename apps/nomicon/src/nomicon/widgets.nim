@@ -16,6 +16,32 @@ const sliderTrackMax = 420.0  ## Slider tracks stop here: inside the horizontal
                               ## at this + 8px padding so the outer `audio` col
                               ## cannot inflate either.
 
+## --- the disclosure icon -------------------------------------------------
+##
+# The expand/collapse mark, chiselled from rectangles: a `+` when closed,
+# the vertical stem dropped to a `−` when open. The toolkit caret is a "v"/
+# "^" glyph in the UI font; the renderer only promises rectangles and text,
+# so an icon built from bars is the honest upgrade - crisp at any size,
+# theme-coloured, and no rotation primitives needed.
+
+proc chisel(width, height: float32, ink: Color) =
+  openElement()
+  configureOpenElement(row(width = fixedPx(width), height = fixedPx(height))
+    .bg(ink))
+  closeElement()
+
+proc disclosure(open: bool, ink: Color) =
+  let t = activeTheme
+  let side = 14.0
+  let th = max(float32(t.metrics.borderRaised), 2.0)
+  let arm = (side - th) / 2.0
+  container(col(width = fixedPx(side), height = fixedPx(side))):
+    container(row(width = grow(), height = fixedPx(arm), alignX = centerX)):
+      if not open: chisel(th, arm, ink)
+    chisel(side, th, ink)
+    container(row(width = grow(), height = fixedPx(arm), alignX = centerX)):
+      if not open: chisel(th, arm, ink)
+
 widget focusable quickButton(title: string, subtitle: string, active: bool,
                              open = false, arrow = true, width = fit()) -> ButtonHit:
   let t = activeTheme
@@ -43,7 +69,8 @@ widget focusable quickButton(title: string, subtitle: string, active: bool,
               elif pointerOver(arrowId): t.palette.buttonHoverBg
               else: Color())
           .corner(t.radii.inner)):
-        chevron(open)
+        disclosure(open,
+          if active: t.palette.onAccent else: t.palette.labelColor)
   result = if onArrow: bhExpand elif hit: bhToggle else: bhNone
 
 widget slider(id: ElementId, value: int, dimmed = false) -> SliderChange:
@@ -73,11 +100,11 @@ widget slider(id: ElementId, value: int, dimmed = false) -> SliderChange:
       alignY = centerY, padding = padAll(4)))
   openElement(trackId, row(width = grow(min = 160.0, max = sliderTrackMax),
       height = fixedPx(8), alignY = centerY)
-      .bg(t.palette.fieldBg).corner(4)
+      .bg(t.palette.fieldBg).corner(t.radii.field)
       .border(t.metrics.borderHairline, t.palette.panelBorder))
   openElement(fillId, col(width = fixedPx(box.width * float32(v) / 100.0),
       height = fixedPx(8))
-      .bg(if dimmed: t.palette.dimColor else: t.palette.accent).corner(4))
+      .bg(if dimmed: t.palette.dimColor else: t.palette.accent).corner(t.radii.inner))
   closeElement()
   closeElement()
   closeElement()

@@ -13,6 +13,9 @@ kitty = { template = 'kitty-theme.conf.j2', target = '~/.cache/wallust/kitty-the
 emacs = { template = 'emacs-theme.el.j2', target = '~/.cache/wallust/wallust.el' }
 mako  = { template = 'mako.conf.j2', target = '~/.cache/wallust/mako.conf' }
 opencode = { template = 'opencode-theme.json.j2', target = '~/.config/opencode/themes/wallust.json' }
+# nomicon needs no templated hook: the app re-reads its theme file every
+# frame, so a running window repaints on its own.
+nomicon = { template = 'nomicon-theme.conf.j2', target = '~/.cache/wallust/nomicon-theme.conf' }
 
 [templated_hooks]
 sway = """swaymsg reload 2>/dev/null || true"""
