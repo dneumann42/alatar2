@@ -1,0 +1,8 @@
+# The directory must exist for Yazi to find the flavor, but its content is
+# generated: wallust renders flavor.toml in here on every wallpaper change
+# (see wallust.toml [templates]; the source of truth is the
+# templates/yazi-flavor.toml.j2 file in the repo). Until the very first
+# render (apply-wallpaper.sh runs `wallust run` at every sway session start)
+# Yazi starts with its built-in default colors.
+*
+!.gitignore

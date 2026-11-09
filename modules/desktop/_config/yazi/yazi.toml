@@ -1,0 +1,21 @@
+# ============================================================================
+# yazi configuration (alatar: desktop/_config/yazi -> ~/.config/yazi).
+# Theme colors are NOT here: theme.toml selects the "wallust" flavor, whose
+# flavor.toml wallust re-renders on every wallpaper change (see
+# wallust/wallust.toml [templates] and wallust/templates/yazi-flavor.toml.j2).
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# Unpacking archives: yazi ships a built-in `extract` plugin that shells out
+# to 7-Zip (the `7z` binary - Arch package `7zip`/`p7zip`), so keep it
+# installed. It extracts the selected (or hovered) archives next to them,
+# into a folder named after the archive, and unwraps compressed tarballs
+# (*.tar.gz, *.tar.zst, ...) in one go instead of leaving the *.tar behind.
+# ---------------------------------------------------------------------------
+[open]
+prepend_rules = [
+	# zip/tar (+ the usual compressors): Enter extracts the hovered or
+	# selected file straight away; shift-Enter also offers "Reveal".
+	{ mime = "application/{zip,tar}", use = [ "extract", "reveal" ] },
+	{ mime = "application/{gzip,xz,zstd,bzip*,lzma}", use = [ "extract", "reveal" ] },
+]

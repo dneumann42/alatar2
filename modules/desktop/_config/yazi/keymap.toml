@@ -1,0 +1,14 @@
+# ============================================================================
+# yazi keybindings (alatar: desktop/_config/yazi -> ~/.config/yazi).
+# Only deviations from the shipped defaults live here - prepend_keymap wins
+# over the defaults, everything else is inherited.
+# ============================================================================
+
+[mgr]
+prepend_keymap = [
+	# Extract the selected archives - or the hovered file when nothing is
+	# selected (%s falls back to hovered). Runs as a yazi task, so progress
+	# shows in the task bar (Ctrl+b) and it can be cancelled there. The
+	# command publishes to the built-in `extract` plugin's remote listener.
+	{ on = "E", run = "shell -- ya pub extract --list %s", desc = "Extract archive(s)" },
+]

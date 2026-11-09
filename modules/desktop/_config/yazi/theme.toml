@@ -1,0 +1,15 @@
+# ============================================================================
+# yazi theme (alatar: desktop/_config/yazi -> ~/.config/yazi).
+# The actual colors come from the "wallust" flavor: on every wallpaper change
+# wallust renders flavors/wallust.yazi/flavor.toml from its live palette
+# (wallust.toml [templates] -> templates/yazi-flavor.toml.j2). Yazi reads the
+# flavor at startup, so a running instance keeps its colors until restarted -
+# no reload hook is wired, same as the opencode theme.
+# Both modes get the same flavor: the palette is always dark (wallust pins
+# the background to black, see the template), so there is no light variant -
+# and listing both keys sidesteps yazi's terminal-mode detection entirely.
+# ============================================================================
+
+[flavor]
+dark  = "wallust"
+light = "wallust"

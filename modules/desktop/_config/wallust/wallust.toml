@@ -16,6 +16,10 @@ opencode = { template = 'opencode-theme.json.j2', target = '~/.config/opencode/t
 # nomicon needs no templated hook: the app re-reads its theme file every
 # frame, so a running window repaints on its own.
 nomicon = { template = 'nomicon-theme.conf.j2', target = '~/.cache/wallust/nomicon-theme.conf' }
+# yazi reads its colors from this generated flavor (theme.toml selects
+# "wallust"); it lands inside the alatar-symlinked ~/.config/yazi, and the
+# flavor directory carries a .gitignore so the repo stays clean.
+yazi    = { template = 'yazi-flavor.toml.j2', target = '~/.config/yazi/flavors/wallust.yazi/flavor.toml' }
 
 [templated_hooks]
 sway = """swaymsg reload 2>/dev/null || true"""
