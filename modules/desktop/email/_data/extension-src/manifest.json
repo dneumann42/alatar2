@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "Proton Mail Bridge provisioning",
+  "version": "4.1",
+  "description": "Creates the Proton Mail Bridge account (IMAP 127.0.0.1:1143, SMTP 127.0.0.1:1025) from ~/.config/alatar/email.json on startup; idempotent. Part of the alatar desktop/email module.",
+  "applications": {
+    "gecko": {
+      "id": "proton-bridge-provision@dneumann.dev",
+      "strict_min_version": "115.0"
+    }
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+  "permissions": ["notifications"],
+  "experiment_apis": {
+    "ProtonBridge": {
+      "schema": "schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "script": "api.js",
+        "paths": [["ProtonBridge"]]
+      }
+    }
+  }
+}

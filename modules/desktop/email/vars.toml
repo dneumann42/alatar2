@@ -1,0 +1,15 @@
+# Personal facts this module cannot know. `alatar install` resolves each
+# through: process env, the systemd user environment,
+# ~/.config/environment.d/50-alatar-vars.conf, then one interactive prompt.
+# A prompted answer goes back into all three, so every consumer - the fs.toml
+# seed below, the provisioning add-on Thunderbird loads, later alatar runs -
+# reads the same value, and nothing is ever asked twice.
+
+[[var]]
+name = "PROTON_EMAIL"
+prompt = "Proton Mail address (Proton Mail Bridge IMAP/SMTP username)"
+
+[[var]]
+name = "PROTON_REALNAME"
+prompt = "Display name Thunderbird puts in the From: header"
+default = "D. Neumann"

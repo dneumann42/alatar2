@@ -1,5 +1,5 @@
 ["desktop/_config/(.*)"]
-to = "$XDG_CONFIG_HOME/$1"
+to = "$HOME/.config/$1"
 
 ["desktop/bash/profile"]
 to = "$HOME/.profile"

@@ -1,6 +1,8 @@
-import std/[os, strutils]
+import std/[os, strutils, tables]
 
 import parsetoml
+
+import alatar/vars
 
 type
   FsKind* = enum
@@ -10,7 +12,9 @@ type
   FsSpec* = object
     kind*: FsKind
     path*: string   ## absolute path, `~` and $VAR expanded
-    content*: string ## file entries only; written when the file is missing
+    content*: string ## file entries only; a $VAR template resolved against
+                     ## the module's vars (see vars.nim), written when the
+                     ## file is missing
 
   FsError* = object of CatchableError
 
@@ -114,9 +118,14 @@ proc fsSpecs*(moduleDir: string): seq[FsSpec] {.
     for spec in loadFsFile(path):
       result.add spec
 
-proc installFs*(specs: seq[FsSpec]) {.raises: [FsError].} =
+proc installFs*(specs: seq[FsSpec], vars: Table[string, string] =
+    initTable[string, string]()) {.raises: [FsError, VarError].} =
   ## Creates each entry that does not exist yet. What already exists is left
   ## exactly as it is - these are user data paths, alatar only seeds them.
+  ## File content is expanded against the module's resolved vars; because a
+  ## seeded file is never rewritten, changing a var's value afterwards means
+  ## deleting the file and re-running the install (the same as hand-editing
+  ## it, which alatar also never does).
   var failures: seq[string]
   for spec in specs:
     try:
@@ -130,7 +139,7 @@ proc installFs*(specs: seq[FsSpec]) {.raises: [FsError].} =
             "A directory sits where the file '" & spec.path & "' belongs")
         elif not fileExists(spec.path):
           createDir(spec.path.parentDir)
-          writeFile(spec.path, spec.content)
+          writeFile(spec.path, expandVars(spec.content, vars))
     except CatchableError as e: # FsError, IOError, OSError
       failures.add "Failed to create '" & spec.path & "': " & e.msg
   if failures.len > 0:

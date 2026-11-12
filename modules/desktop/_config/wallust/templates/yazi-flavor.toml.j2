@@ -12,6 +12,13 @@
   file just means yazi falls back to its built-in default colors.
 #}
 # vim:fileencoding=utf-8:foldmethod=marker
+{#
+  ROUNDED CORNERS TODO: yazi <= 26.9.1 hardcodes the ╭╮╰╯ corners on floating
+  windows; there is NO theme key that changes them. Upstream main added
+  `border_set` per float section. Once a release containing it is installed
+  (e.g. yazi-git, or the next stable), uncomment the border_set lines below in
+  every float section to get square corners.
+#}
 
 # : Manager --
 
@@ -88,6 +95,7 @@ progress_error  = { fg = "{{ color3 }}", bg = "{{ color1 }}" }
 # : Pick --
 
 [pick]
+# border_set = { as = "plain" }   # TODO: uncomment on yazi with border_set support
 border   = { fg = "{{ color4 }}" }
 active   = { fg = "{{ color5 }}", bold = true }
 inactive = {}
@@ -98,6 +106,7 @@ inactive = {}
 # : Input --
 
 [input]
+# border_set = { as = "plain" }   # TODO: uncomment on yazi with border_set support
 border   = { fg = "{{ color4 }}" }
 title    = {}
 value    = {}
@@ -109,6 +118,7 @@ selected = { reversed = true }
 # : Completion --
 
 [cmp]
+# border_set = { as = "plain" }   # TODO: uncomment on yazi with border_set support
 border = { fg = "{{ color4 }}" }
 
 # : ---
@@ -117,6 +127,7 @@ border = { fg = "{{ color4 }}" }
 # : Tasks --
 
 [tasks]
+# border_set = { as = "plain" }   # TODO: uncomment on yazi with border_set support
 border  = { fg = "{{ color4 }}" }
 title   = {}
 hovered = { fg = "{{ color5 }}", bold = true }
@@ -127,6 +138,7 @@ hovered = { fg = "{{ color5 }}", bold = true }
 # : Which --
 
 [which]
+# border_set = { as = "plain" }   # TODO: uncomment on yazi with border_set support
 border          = { fg = "{{ color4 }}" }
 cand            = { fg = "{{ color6 }}" }
 rest            = { fg = "{{ foreground | blend(color8) }}" }
@@ -140,6 +152,7 @@ separator_style = { fg = "{{ color8 | blend('#000000') }}" }
 # : Help --
 
 [help]
+# border_set = { as = "plain" }   # TODO: uncomment on yazi with border_set support
 border  = { fg = "{{ color4 }}" }
 action  = { fg = "{{ color6 }}" }
 chord   = { fg = "{{ color5 }}" }
@@ -151,6 +164,7 @@ hovered = { reversed = true, bold = true }
 # : Spotter --
 
 [spot]
+# border_set = { as = "plain" }   # TODO: uncomment on yazi with border_set support
 border   = { fg = "{{ color4 }}" }
 title    = { fg = "{{ color4 }}" }
 tbl_col  = { fg = "{{ color6 }}" }
@@ -162,6 +176,7 @@ tbl_cell = { fg = "{{ color5 }}", bg = "{{ color8 | blend('#000000') }}" }
 # : Notification --
 
 [notify]
+# border_set = { as = "plain" }   # TODO: uncomment on yazi with border_set support
 title_info  = { fg = "{{ color2 }}" }
 title_warn  = { fg = "{{ color3 }}" }
 title_error = { fg = "{{ color1 }}" }

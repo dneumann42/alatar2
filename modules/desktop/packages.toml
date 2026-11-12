@@ -531,6 +531,18 @@ source = "aur"
 tags = ["system", "gui"]
 
 [[package]]
+name = "pamac-all"
+source = "aur"
+tags = ["system", "gui", "packaging"]
+
+# The appindicator/SNI tray icon of the appindicator-tray build above
+# (upstream pamac-tray is a Gtk3.StatusIcon, which sway cannot show).
+[[package]]
+name = "libayatana-appindicator"
+source = "arch"
+tags = ["gui", "libs"]
+
+[[package]]
 name = "podman"
 source = "arch"
 tags = ["containers"]
@@ -607,5 +619,10 @@ tags = ["virtualization"]
 
 [[package]]
 name = "protonmail-bridge"
+source = "arch"
+tags = ["email"]
+
+[[package]]
+name = "thunderbird"
 source = "arch"
 tags = ["email"]

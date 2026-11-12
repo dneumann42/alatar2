@@ -1,6 +1,6 @@
 import std/[os, strutils, sequtils]
 
-import alatar/[fs, packages, repos, services, symlinks]
+import alatar/[fs, packages, repos, services, symlinks, vars]
 
 type
   ModuleStatus* = enum Installed, Error, NotInstalled
@@ -66,7 +66,7 @@ proc packageFiles(dir: string): seq[string] {.raises: [OSError].} =
 
 proc installOwn*(module: Module, dir, modulesRoot: string): seq[ServiceSpec] {.
     raises: [PackageError, RepoError, FsError, ServiceError, SymlinkError,
-             IOError, OSError].} =
+             VarError, IOError, OSError].} =
   ## Installs only this module's own repositories, packages, filesystem
   ## entries, symlinks and units; no dependency or submodule resolution (use
   ## the registry procs for that). Returns the session-bound units, which the
@@ -77,9 +77,13 @@ proc installOwn*(module: Module, dir, modulesRoot: string): seq[ServiceSpec] {.
   ensureRepos(loadRepos(dir))
   for path in packageFiles(dir):
     installAll(loadSpecFile(path))
+  # Variables before everything that can consume them: fs.toml content is a
+  # $VAR template, and the resolved values live in the systemd user
+  # environment the units inherit.
+  let vars = resolveVars(dir)
   # Directories and files before symlinks and units: a link destination or a
   # unit's state path can live under a directory fs.toml creates.
-  installFs(fsSpecs(dir))
+  installFs(fsSpecs(dir), vars)
   # Config symlinks before units: a unit may exec a script that only exists
   # once it is linked into place.
   installSymlinks(symlinkSpecs(dir, modulesRoot))
@@ -89,7 +93,7 @@ proc installOwn*(module: Module, dir, modulesRoot: string): seq[ServiceSpec] {.
 proc installTree(module: Module, moduleDir, modulesRoot: string,
                  sessionUnits: var seq[ServiceSpec]) {.
     raises: [PackageError, RepoError, FsError, ServiceError, SymlinkError,
-             IOError, OSError].} =
+             VarError, IOError, OSError].} =
   let dir = moduleDir / module.name
   # Parent before children: a submodule's unit can need a package this module
   # installs (awww <-> theming/wallpaper.service) or bind to a target defined
@@ -100,7 +104,7 @@ proc installTree(module: Module, moduleDir, modulesRoot: string,
 
 proc install*(module: Module, moduleDir, modulesRoot: string) {.
     raises: [PackageError, RepoError, FsError, ServiceError, SymlinkError,
-             IOError, OSError].} =
+             VarError, IOError, OSError].} =
   ## Tree install without dependency resolution. Modules listed in
   ## `dependencies` files are NOT installed here; prefer
   ## `install*(reg: ModuleRegistery, ...)`, which resolves them.

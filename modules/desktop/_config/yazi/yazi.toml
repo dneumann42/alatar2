@@ -19,3 +19,18 @@ prepend_rules = [
 	{ mime = "application/{zip,tar}", use = [ "extract", "reveal" ] },
 	{ mime = "application/{gzip,xz,zstd,bzip*,lzma}", use = [ "extract", "reveal" ] },
 ]
+
+# ---------------------------------------------------------------------------
+# Aseprite previews: yazi has no idea what a .aseprite is, so the previewer
+# in previews/aseprite.lua shells out to `ellipse image export` (install
+# the ellipse binary: make install) and shows the rendered PNG, cached under
+# /tmp/ellipse-aseprite. The preloader renders ahead, so the pane fills in
+# without a wait.
+# ---------------------------------------------------------------------------
+[[plugin.prepend_previewers]]
+url = "*.{ase,aseprite}"
+run = "aseprite"
+
+[[plugin.prepend_preloaders]]
+url = "*.{ase,aseprite}"
+run = "aseprite"

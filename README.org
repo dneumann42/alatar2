@@ -26,6 +26,23 @@ removes the links; a real file or directory in the way triggers a y/n
 replace prompt. Directories starting with `_` (like `desktop/_config`) are
 the module's own files, never submodules.
 
+vars.toml declares personal facts a module cannot know itself (an email
+address, a nickname): each `[[var]]` table has a `name` (a valid environment
+variable identifier), a `prompt`, and an optional `default` (the empty-answer
+fallback; without a TTY a defaulted var uses it silently, and a prompt-less
+unknown var aborts the install rather than guessing). `alatar install`
+resolves every var through, in order: the process environment (a one-run
+override, never persisted), the live systemd user environment, and
+`$XDG_CONFIG_HOME/environment.d/50-alatar-vars.conf` - the drop-in alatar
+itself writes when it has to ask. A prompted answer goes into that file and
+is pushed into the running manager with `systemctl --user set-environment`,
+so the question is asked exactly once per machine: afterwards systemd knows
+the value, every session unit inherits it, and other modules naming the same
+var read the same answer. fs.toml `content` is expanded against the resolved
+vars ($VAR/${NAME} templates; names not declared stay literal), which is how
+desktop/email seeds `~/.config/alatar/email.json` for its Thunderbird
+provisioning add-on.
+
 tidy.toml decides where loose files belong on the machine: each `[[rule]]`
 table has optional predicates `ext` (a string or array of filename
 extensions, case-insensitive) and `match` (a regex, pure-Nim engine,
@@ -89,10 +106,12 @@ Bootstrap contract:
   files.
 - Within a module: repositories first (=repos.toml=, so a package listed later
   can live in one of them), then packages (=before = true= entries via pacman /
-  git+makepkg, everything else via paru and flatpak), then filesystem entries
+  git+makepkg, everything else via paru and flatpak), then variables
+  (=vars.toml=, possibly asking once), then filesystem entries
   (=fs.toml=, =[[directory]]=/=[[file]]= tables with =path= and optional
   =content=: created when missing, never overwritten or deleted, paths expand
-  =~= and =$VAR=), then config symlinks, then units - and all of that before
+  =~= and =$VAR=, content additionally expands the module's resolved vars),
+  then config symlinks, then units - and all of that before
   its submodules, so a child can rely on
   a binary or a target the parent provides (awww <->
   desktop/theming/wallpaper.service, sway-session.target <-> the session

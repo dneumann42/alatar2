@@ -1,0 +1,14 @@
+[
+  {
+    "namespace": "ProtonBridge",
+    "description": "Create the Bridge-backed mail account (idempotent).",
+    "functions": [
+      {
+        "name": "provision",
+        "type": "function",
+        "async": true,
+        "parameters": []
+      }
+    ]
+  }
+]

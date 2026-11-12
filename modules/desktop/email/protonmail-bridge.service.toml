@@ -1,0 +1,32 @@
+[Unit]
+Description=Proton Mail Bridge (local IMAP/SMTP daemon)
+Documentation=https://proton.me/mail/bridge
+# Needs the user's D-Bus session (gnome-keyring holds the Bridge login
+# state) and its only client, Thunderbird, runs in the sway session - so it
+# starts and dies with that session like the other session services.
+PartOf=sway-session.target
+After=sway-session.target
+# Same guards as polkit-gnome.service: give up instead of crash-looping if
+# the session dies underneath.
+StartLimitBurst=5
+StartLimitIntervalSec=30
+
+[Service]
+Type=exec
+# NOT /usr/bin/protonmail-bridge: that is the Qt GUI launcher (bridge-gui)
+# and it aborts with no display (verified). The Go binary underneath is the
+# daemon; --grpc additionally publishes the local control socket
+# (~/.config/protonmail/bridge-v3/grpcServerConfig.json) so a later
+# `protonmail-bridge` run ATTACHES to this daemon and shows a window -
+# without --grpc the wrapper cannot attach, spawns its own daemon, hits the
+# lock file, and silently quits (which is what made `protonmail-bridge
+# --cli` look dead: the wrapper swallows flags, the real TUI is
+# '/usr/lib/protonmail/bridge/bridge --cli' with this unit stopped).
+# Verified: binds 127.0.0.1:1143/1025 as soon as the D-Bus session (gnome
+# keyring) is reachable, which user units have by default.
+ExecStart=/usr/lib/protonmail/bridge/bridge --grpc
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=sway-session.target

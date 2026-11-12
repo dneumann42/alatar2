@@ -1,0 +1,6 @@
+# The provisioning add-on, linked into the deterministic profile's cell.
+# The filename must be the add-on id (profile cells key on it). _data/ starts
+# with '_' so it is module files, not a submodule (see src/alatar/modules.nim).
+
+["desktop/email/_data/extension/proton-bridge-provision@dneumann.dev.xpi"]
+to = "$HOME/.thunderbird/alatar.default-release/extensions/proton-bridge-provision@dneumann.dev.xpi"

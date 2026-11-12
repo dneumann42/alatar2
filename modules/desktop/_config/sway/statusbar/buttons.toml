@@ -3,21 +3,32 @@
 # binary, started via scripts/bar-buttons.sh from sway's applications.conf).
 #
 # Each [[button]] is a small GTK4 layer-shell surface pinned to the top
-# edge of every monitor, sitting in the bar's side gaps (see `gaps` in
-# ../bar.conf — it must reserve button_width pixels per button per side).
-# Left-side buttons stack left→right from the screen's left edge in file
-# order; right-side buttons stack from the right edge. `command` runs in
-# `sh -c`, detached. Use `icon` (a png/jpg; relative paths resolve against
-# this file's directory) or `glyph` (a Nerd Font codepoint) per button.
+# edge of every monitor, sitting in the bar's side gaps. barbuttons
+# computes the per-side gaps (button_width x buttons per side + the
+# gap_pad_* below) and pushes them to swaybar at runtime, so swaybar's
+# text starts right beside the buttons. Left-side buttons stack left→right
+# from the screen's left edge in file order; right-side buttons stack from
+# the right edge. `command` runs in `sh -c`, detached. Use `icon` (a
+# png/jpg; relative paths resolve against this file's directory) or
+# `glyph` (a Nerd Font codepoint) per button.
 #
-# Edits apply live (the binary polls this file every second). Changing
-# button_width or the number of buttons per side also needs a `gaps`
-# update in bar.conf → run `swaymsg reload` after such edits.
+# Edits apply live (the binary polls this file every second), INCLUDING
+# adding/removing buttons: the bar margins follow automatically via
+# `swaymsg bar <sway_bar_id> gaps` (a live swaybar IPC update, no reload).
+# bar.conf's static `gaps` only seeds the first swaybar start; keep it
+# roughly right to avoid a margin nudge at boot.
 # ============================================================================
 
 bar_height   = 20        # px — sync with bar.conf `height`
-button_width = 24        # px — sync with bar.conf `gaps` (per button)
+button_width = 24        # px — per-button gap on each side
 icon_height  = 16        # px — rendered icon height (aspect ratio kept)
+
+sway_bar_id  = "main"    # bar to push gaps to; "" disables the syncing
+gap_pad_left  = 0        # px reserved on the left beyond our buttons
+gap_pad_right = 0        # px reserved on the right beyond our buttons AND
+                         # the live tray strip (its width arrives via the
+                         # tray_width_file heartbeat, see below)
+# tray_width_file = ""   # override; default $XDG_RUNTIME_DIR/alatar-tray.width
 
 background       = "#000000"   # $bar_bg so buttons blend into the bar
 hover_background = "#1c1f26"
@@ -44,6 +55,23 @@ command = "sh $HOME/.config/sway/scripts/nomicon.sh"
 side    = "right"
 glyph   = "\uf120"          # fa-terminal, from the Nerd Font
 command = '''swaymsg -t get_tree | grep -q '"nirsstui"' && swaymsg '[app_id="nirsstui"] focus' || kitty --class nirsstui -e nirsstui'''
+
+# --- right: package manager (pamac; single-instance, relaunch focuses it;
+#     floats via window-rules.conf) ---
+[[button]]
+side    = "right"
+glyph   = "\uf187"          # fa-archive, from the Nerd Font
+command = "pamac-manager"
+
+# --- right: email (thunderbird; autostarted on workspace 9 — focus the
+#     running instance, launch + focus once its window appears if it is
+#     gone. TB 146+ on Wayland reports app_id "org.mozilla.Thunderbird",
+#     not "thunderbird" — the old ids stay in the alternations as fallback.
+#     See window-rules.conf) ---
+[[button]]
+side    = "right"
+glyph   = "\uf0e0"          # fa-envelope, from the Nerd Font
+command = '''if swaymsg -t get_tree | grep -Eq '"app_id": *"(org\.mozilla\.)?[Tt]hunderbird"'; then swaymsg '[app_id="^(thunderbird|Thunderbird|org\.mozilla\.Thunderbird)$"] focus'; else thunderbird; for i in 1 2 3 4 5 6 7 8 9 10 11 12; do sleep 1; swaymsg '[app_id="^(thunderbird|Thunderbird|org\.mozilla\.Thunderbird)$"] focus' | grep -q app_id && break; done; fi'''
 
 # --- example right-side button (also widen bar.conf's `gaps` right!) ---
 # [[button]]
