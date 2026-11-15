@@ -1,36 +1,21 @@
 # ============================================================================
-# swaybar side buttons — rendered by bin/barbuttons (this project's second
-# binary, started via scripts/bar-buttons.sh from sway's applications.conf).
+# Bar buttons — drawn INSIDE the ellipse bar (apps/bar, bar/buttons.nim),
+# launched by scripts/bar.sh from sway's applications.conf. This replaces
+# the old GTK4 barbuttons surfaces and the swaybar gaps they lived in:
+# the bar renders its whole width and places buttons here as the first/last
+# cells, left→right in file order on the left, stacked from the right edge.
 #
-# Each [[button]] is a small GTK4 layer-shell surface pinned to the top
-# edge of every monitor, sitting in the bar's side gaps. barbuttons
-# computes the per-side gaps (button_width x buttons per side + the
-# gap_pad_* below) and pushes them to swaybar at runtime, so swaybar's
-# text starts right beside the buttons. Left-side buttons stack left→right
-# from the screen's left edge in file order; right-side buttons stack from
-# the right edge. `command` runs in `sh -c`, detached. Use `icon` (a
-# png/jpg; relative paths resolve against this file's directory) or
-# `glyph` (a Nerd Font codepoint) per button.
-#
-# Edits apply live (the binary polls this file every second), INCLUDING
-# adding/removing buttons: the bar margins follow automatically via
-# `swaymsg bar <sway_bar_id> gaps` (a live swaybar IPC update, no reload).
-# bar.conf's static `gaps` only seeds the first swaybar start; keep it
-# roughly right to avoid a margin nudge at boot.
+# Edits apply live: the bar re-reads this file every frame. `command` runs
+# in `sh -c`, detached. Use `icon` (a png/jpg; relative paths resolve
+# against this file's directory, decoded async like tray icons) or `glyph`
+# (a Nerd Font codepoint) per button.
 # ============================================================================
 
-bar_height   = 20        # px — sync with bar.conf `height`
-button_width = 24        # px — per-button gap on each side
+button_width = 24        # px — per-button cell on each side
 icon_height  = 16        # px — rendered icon height (aspect ratio kept)
 
-sway_bar_id  = "main"    # bar to push gaps to; "" disables the syncing
-gap_pad_left  = 0        # px reserved on the left beyond our buttons
-gap_pad_right = 0        # px reserved on the right beyond our buttons AND
-                         # the live tray strip (its width arrives via the
-                         # tray_width_file heartbeat, see below)
-# tray_width_file = ""   # override; default $XDG_RUNTIME_DIR/alatar-tray.width
-
-background       = "#000000"   # $bar_bg so buttons blend into the bar
+background       = "#000000"   # unused by the bar (cells are transparent);
+                               # kept so the old barbuttons build still reads
 hover_background = "#1c1f26"
 
 font      = "JetBrainsMono Nerd Font"   # glyph buttons, same as the bar

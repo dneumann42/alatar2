@@ -1,7 +1,7 @@
 # Package
 
 version       = "0.2.0"
-description   = "Swaybar status line (i3bar/sway JSON protocol): media, cpu, temp, gpu, ram, network, volume, weather, date, clock, with click support. Plus bar-buttons: configurable GTK4 layer-shell buttons beside the bar (buttons.toml)."
+description   = "Swaybar status line (i3bar/sway JSON protocol): media, cpu, temp, gpu, ram, network, volume, weather, date, clock, with click support. Spawned by apps/bar now that swaybar itself is retired (its buttons sibling binary, barbuttons, is legacy: the bar draws buttons.toml in-surface)."
 license       = "MIT"
 author        = "dneumann"
 
