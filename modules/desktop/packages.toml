@@ -510,15 +510,9 @@ name = "openssh"
 source = "arch"
 tags = ["system", "network"]
 
-[[package]]
-name = "bluez"
-source = "arch"
-tags = ["system", "bluetooth"]
-
-[[package]]
-name = "bluez-utils"
-source = "arch"
-tags = ["system", "bluetooth"]
+# bluez and bluez-utils are owned by the desktop/bluetooth submodule, which
+# runs the session applet against them (declaring them in two places breaks
+# the install order, like every other duplicated package).
 
 [[package]]
 name = "fuse2"

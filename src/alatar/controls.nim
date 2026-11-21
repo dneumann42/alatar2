@@ -213,9 +213,16 @@ proc bluetoothCtl(args: seq[string]): string {.raises: [ControlError].} =
   runOk("bluetoothctl", @["--timeout", "5"] & args)
 
 proc bluetoothAvailable*(): bool =
-  let r = try: capture("busctl", @["--system", "is-active", "org.bluez"])
+  # 'busctl is-active' is not a busctl verb (it silently exits non-zero with
+  # "Unknown command verb", so the daemon looked dead even while running):
+  # Ping the org.bluez name on the system bus instead - exit 0 means the
+  # bluetoothd owns the name bluetoothctl talks to. A failed D-Bus
+  # activation (no daemon, no unit) also lands here as non-zero.
+  let r = try: capture("busctl", @["--system", "--timeout=5", "call",
+                                   "org.bluez", "/org/bluez",
+                                   "org.freedesktop.DBus.Peer", "Ping"])
         except ControlError: (output: "", code: 1)
-  r.code == 0 and r.output == "active"
+  r.code == 0
 
 proc bluetoothEnabled*(): bool {.raises: [ControlError].} =
   bluetoothAvailable() and bluetoothCtl(@["show"]).fieldValue("Powered") == "yes"

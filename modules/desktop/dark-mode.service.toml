@@ -1,0 +1,24 @@
+[Unit]
+Description=Default the system (desktop) theme to dark
+Documentation=man:gsettings(1)
+# Apps that follow the "system" light/dark setting (GTK4/libadwaita,
+# Electron, Qt, and anything going through the xdg-desktop-portal Settings
+# backend) resolve their choice from org.gnome.desktop.interface
+# color-scheme. The environment.d/dark.conf drop-in already forces dark on
+# toolkits that honour GTK_THEME / ADW_DEBUG_COLOR_SCHEME /
+# QT_STYLE_OVERRIDE, but those are per-process overrides: an app that asks
+# GSettings what the *system* prefers still saw 'default' (light) and
+# started light. Set the real GSettings keys once each login so "follow
+# system" resolves to dark everywhere.
+#
+# Bound to default.target (not sway-session.target) on purpose: this is a
+# genuine system-wide default that must apply at login even before a
+# compositor is up. Type=oneshot is idempotent, so re-running it is harmless.
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+ExecStart=/usr/bin/gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
+
+[Install]
+WantedBy=default.target

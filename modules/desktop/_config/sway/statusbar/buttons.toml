@@ -48,11 +48,12 @@ side    = "right"
 glyph   = "\uf187"          # fa-archive, from the Nerd Font
 command = "pamac-manager"
 
-# --- right: email (thunderbird; autostarted on workspace 9 — focus the
-#     running instance, launch + focus once its window appears if it is
-#     gone. TB 146+ on Wayland reports app_id "org.mozilla.Thunderbird",
-#     not "thunderbird" — the old ids stay in the alternations as fallback.
-#     See window-rules.conf) ---
+# --- right: email (thunderbird; NOT autostarted — this button is the only
+#     entry point: focus the running instance, launch + focus once its
+#     window appears if it is gone. Once open it is parked on workspace 9
+#     and survives sway reloads. TB 146+ on Wayland reports app_id
+#     "org.mozilla.Thunderbird", not "thunderbird" — the old ids stay in
+#     the alternations as fallback. See window-rules.conf) ---
 [[button]]
 side    = "right"
 glyph   = "\uf0e0"          # fa-envelope, from the Nerd Font

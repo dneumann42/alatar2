@@ -3,7 +3,7 @@
 # Bring up the systemd user session for sway: publish the compositor's
 # environment to the user manager, activate sway-session.target, then make sure
 # the session services that hang off it are actually running (wallpaper.service
-# = the awww daemon, polkit-gnome.service).
+# = the awww daemon, polkit-gnome.service, blueman-applet.service).
 #
 # Run by sway as `exec_always` (appearance.conf), so it re-runs on reload and
 # after the compositor restarts. Doing the import and the start *sequentially
@@ -45,7 +45,7 @@ systemctl --user --no-block start sway-session.target 2>/dev/null || true
 # Units enabled *after* the target was last activated - i.e. everything alatar
 # installs into a live session - are not pulled in by a target that is already
 # up, so start them by name. is-enabled keeps disabled units out.
-for unit in wallpaper.service polkit-gnome.service downloads-watch.service downloads-watch.path downloads-watch.timer xdg-mime-sync.service; do
+for unit in wallpaper.service polkit-gnome.service blueman-applet.service downloads-watch.service downloads-watch.path downloads-watch.timer xdg-mime-sync.service; do
     systemctl --user is-enabled "$unit" >/dev/null 2>&1 || continue
     systemctl --user --no-block start "$unit" 2>/dev/null || true
 done

@@ -87,6 +87,10 @@ proc installOwn*(module: Module, dir, modulesRoot: string): seq[ServiceSpec] {.
   # Config symlinks before units: a unit may exec a script that only exists
   # once it is linked into place.
   installSymlinks(symlinkSpecs(dir, modulesRoot))
+  # System units before the user units that talk to them: blueman-applet
+  # (a user unit) needs the bluez daemon (a system unit) already up, and
+  # their packages are installed by now, so enabling can also start.
+  installSystemUnits(loadSystemUnits(dir))
   # Units need their packages, so services come last.
   result = installServices(loadServices(dir))
 
@@ -171,6 +175,9 @@ proc uninstall*(module: Module, moduleDir, modulesRoot: string) {.
   for subModule in module.subModules:
     subModule.uninstall(dir, modulesRoot)
   uninstallServices(loadServices(dir))
+  # User units first (blueman-applet is a client of the daemon), then the
+  # system units this module declared, before their packages disappear.
+  uninstallSystemUnits(loadSystemUnits(dir))
   uninstallSymlinks(symlinkSpecs(dir, modulesRoot))
   for path in packageFiles(dir):
     uninstallAll(loadSpecFile(path))
@@ -233,6 +240,14 @@ proc statusDetail*(reg: ModuleRegistery, moduleName: string): (ModuleStatus, seq
         try:
           if svc.isInstalled(): inc installed
           else: missing.add item & " is not installed, enabled or running"
+        except ServiceError as e:
+          unverifiable.add item & " cannot be verified: " & e.msg
+      for unit in loadSystemUnits(dir):
+        inc total
+        let item = m.name & ": system unit '" & unit.name & "'"
+        try:
+          if unit.isInstalled(): inc installed
+          else: missing.add item & " is not enabled or running"
         except ServiceError as e:
           unverifiable.add item & " cannot be verified: " & e.msg
       for spec in symlinkSpecs(dir, reg.moduleDir):

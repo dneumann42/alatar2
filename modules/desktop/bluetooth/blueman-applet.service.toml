@@ -1,0 +1,33 @@
+[Unit]
+Description=Blueman Bluetooth applet
+Documentation=https://github.com/blueman-project/blueman
+# Session service, not a login service: the applet is the session's Bluetooth
+# presence - it publishes the adapter state as a StatusNotifierItem for the
+# bar's tray host and opens blueman-manager dialogs, so it needs a live
+# Wayland session and a session bus, like polkit-gnome.service.
+# sway starts the session (sway-session.target) and pulls this unit in via
+# WantedBy below; the daemon itself (bluez) is a system unit, declared in
+# this module's systemd.toml, so it is enabled and running before any of
+# this talks to the system bus.
+PartOf=sway-session.target
+After=sway-session.target
+# Same guards as the other session units: outside a session the applet has
+# no tray to register with, so skip cleanly instead of crash-looping. A
+# failed condition leaves the unit inert, so `alatar install` from a TTY is
+# a silent no-op until sway activates the target.
+ConditionEnvironment=WAYLAND_DISPLAY
+StartLimitBurst=5
+StartLimitIntervalSec=30
+
+[Service]
+Type=exec
+# The applet stays in the foreground under systemd (no daemonizing) and
+# spawns nothing else that outlives it: the SNI item lives in-process, so
+# the default cgroup KillMode tears the whole tray presence down with the
+# unit when sway-session.target stops.
+ExecStart=/usr/bin/blueman-applet
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=sway-session.target

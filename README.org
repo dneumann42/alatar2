@@ -15,6 +15,17 @@ removing an entry never edits pacman.conf back, because installed packages may
 come from that repo. =ALATAR_PACMAN_CONF= points the logic at another file,
 which is how the patching is tested without root.
 
+systemd.toml files declare *system* (PID 1) units a module needs, one
+=[[unit]]= table each with a =name= (a vendor unit like
+=bluetooth.service= - alatar never writes system unit files). Installing
+enables and starts them through the same sudo/pkexec escalation as
+packages, but only after an unprivileged =systemctl is-enabled=/=is-active=
+check says something is missing; uninstalling disables them again. This
+complements the =<name>.service.toml= user units, which alatar manages
+without root: a user unit cannot pull up a system daemon, so bluez is
+declared here while the applet talking to it is a user unit of the same
+module.
+
 symlink.toml files map config sources to their destinations: each table is
 named by a regex (plain paths work) matched against paths relative to the
 modules root - quote keys with `/`. The pattern is applied to the direct

@@ -1,5 +1,9 @@
 import std/[os, osproc, posix, streams, strutils]
 
+import parsetoml
+
+import alatar/packages
+
 type
   ServiceKind* = enum
     service
@@ -12,6 +16,11 @@ type
     kind*: ServiceKind
     sourcePath*: string
 
+  SystemUnitSpec* = object
+    name*: string       # unit name as shipped by a package, e.g.
+                        # "bluetooth.service"
+    sourcePath*: string # the systemd.toml that declared it
+
   ServiceError* = object of CatchableError
 
 const
@@ -19,6 +28,9 @@ const
     # Targets activated by a compositor session (sway-session.target,
     # graphical-session.target, ...). Units tied to one only work while that
     # session is running.
+
+  systemUnitExtensions = [".service", ".socket", ".target", ".timer",
+                          ".path", ".mount", ".swap", ".slice"]
 
 proc userUnitDir(): string {.raises: [].} =
   (getEnv("XDG_CONFIG_HOME", getHomeDir() / ".config") / "systemd" / "user")
@@ -332,3 +344,117 @@ proc uninstallServices*(svcs: seq[ServiceSpec]) {.raises: [ServiceError].} =
       failures.add e.msg
   if failures.len > 0:
     raise newException(ServiceError, "Service removal failed:\n" & failures.join("\n"))
+
+## --- system (PID 1) units -----------------------------------------------------
+##
+## `systemd.toml` files declare units that the *system* manager must run for a
+## module to work - the bluez daemon being the archetype: alatar's own units
+## are user units, but a user unit cannot pull up a system one, and bluez
+## stopped shipping the D-Bus-activated dbus-org.bluez.service, so its
+## org.bluez system-service file references a unit that no longer exists.
+## Entries name vendor units (from packages, never unit files alatar writes):
+##
+##     [[unit]]
+##     name = "bluetooth.service"
+##
+## Installing ensures the unit is enabled and running, escalating through
+## sudo/pkexec like packages and repos do, but only after the unprivileged
+## check says something is missing - a machine that already satisfies the
+## declaration is never asked for a password. Uninstalling disables it again:
+## the declaring module owns the declaration, and (like user units) units
+## other modules merely depend on are declared by those modules, not here.
+
+proc systemWideCapture(args: seq[string]): string {.raises: [ServiceError].} =
+  ## Trimmed stdout of system-wide `systemctl <args>`. Unknown or disabled
+  ## units fail with output on stderr, so empty output means "not there".
+  try:
+    let p = startProcess(command = "systemctl", args = @args,
+                         options = {poUsePath})
+    var output = ""
+    while not p.outputStream.atEnd():
+      output.add p.outputStream.readLine()
+      output.add '\n'
+    discard p.waitForExit()
+    close(p)
+    result = output.strip
+  except CatchableError as e:
+    raise newException(ServiceError,
+      "Failed to run 'systemctl " & args.join(" ") & "': " & e.msg, e)
+
+proc validUnitName(name: string): bool =
+  ## A bare unit name (letters, digits, '-', '_', '.') ending in a systemd
+  ## unit suffix - enough to keep path tricks out of the privileged call.
+  let parts = name.splitFile
+  if parts.ext notin systemUnitExtensions or parts.name.len == 0:
+    return false
+  for c in name:
+    if not (c in 'a' .. 'z' or c in 'A' .. 'Z' or c in '0' .. '9' or
+            c in {'-', '_', '.', '@'}):
+      return false
+  result = true
+
+proc loadSystemUnits*(dir: string): seq[SystemUnitSpec] {.
+    raises: [ServiceError].} =
+  ## Parses '<module>/systemd.toml'; absent file means no system units.
+  let path = dir / "systemd.toml"
+  if not fileExists(path):
+    return
+  let table =
+    try:
+      parsetoml.parseString(readFile(path))
+    except Exception as e: # parsetoml raises Exception; plus IO errors
+      raise newException(ServiceError, "Failed to parse '" & path & "': " & e.msg, e)
+  let units = table.getOrDefault("unit")
+  if units.isNil:
+    return
+  for i in 0 ..< units.len:
+    let name = units[i].getOrDefault("name").getStr("").strip
+    if not name.validUnitName:
+      raise newException(ServiceError,
+        "Invalid systemd unit name '" & name & "' in '" & path &
+        "' (expected <name>.<unit-type>)")
+    result.add SystemUnitSpec(name: name, sourcePath: path)
+
+proc systemUnitActive(unit: SystemUnitSpec): bool {.raises: [ServiceError].} =
+  systemWideCapture(@["is-active", unit.name]) == "active"
+
+proc systemUnitEnabled(unit: SystemUnitSpec): bool {.raises: [ServiceError].} =
+  systemWideCapture(@["is-enabled", unit.name]) in
+    ["enabled", "enabled-runtime", "static", "alias"]
+
+proc installSystemUnits*(units: seq[SystemUnitSpec]) {.raises: [ServiceError].} =
+  if units.len == 0: return
+  var failures: seq[string]
+  for unit in units:
+    try:
+      if systemUnitEnabled(unit) and systemUnitActive(unit):
+        continue # already satisfied: no password prompt, no systemctl call
+      runPrivileged("systemctl", @["enable", "--now", unit.name])
+    except PackageError as e:
+      failures.add e.msg
+    except ServiceError as e:
+      failures.add e.msg
+  if failures.len > 0:
+    raise newException(ServiceError,
+      "System unit installation failed:\n" & failures.join("\n"))
+
+proc uninstallSystemUnits*(units: seq[SystemUnitSpec]) {.raises: [ServiceError].} =
+  if units.len == 0: return
+  var failures: seq[string]
+  for unit in units:
+    try:
+      if not systemUnitEnabled(unit) and not systemUnitActive(unit):
+        continue
+      runPrivileged("systemctl", @["disable", "--now", unit.name])
+    except PackageError as e:
+      failures.add e.msg # already off, or no elevation available: report and
+    except ServiceError as e:
+      failures.add e.msg # keep going with the rest of the uninstall
+  if failures.len > 0:
+    raise newException(ServiceError,
+      "System unit removal failed:\n" & failures.join("\n"))
+
+proc isInstalled*(unit: SystemUnitSpec): bool {.raises: [ServiceError].} =
+  ## A system unit counts as installed when it is both enabled and running -
+  ## the state alatar guarantees, and what catches "bluez stopped again".
+  systemUnitEnabled(unit) and systemUnitActive(unit)

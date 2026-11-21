@@ -111,20 +111,24 @@ proc walk(node: JsonNode; outp: var seq[Worksp]) =
   if node.kind == JObject:
     let t = node.getOrDefault("type")
     if t != nil and t.kind == JString and t.str == "workspace":
-      var w = Worksp()
+      # sway's tree carries the scratchpad as a workspace named
+      # "__i3_scratch"; get_workspaces never lists it. Like swaybar, hide
+      # any workspace whose name starts with "__i3" so no stray pill shows.
       let nm = node.getOrDefault("name")
-      if nm != nil and nm.kind == JString: w.name = nm.str
-      let nu = node.getOrDefault("num")
-      if nu != nil and nu.kind == JInt: w.num = nu.num.int
-      let op = node.getOrDefault("output")
-      if op != nil and op.kind == JString: w.output = op.str
-      let fc = node.getOrDefault("focused")
-      if fc != nil and fc.kind == JBool: w.focused = fc.bval
-      let vi = node.getOrDefault("visible")
-      if vi != nil and vi.kind == JBool: w.visible = vi.bval
-      let ur = node.getOrDefault("urgent")
-      if ur != nil and ur.kind == JBool: w.urgent = ur.bval
-      outp.add w
+      if nm != nil and nm.kind == JString and not nm.str.startsWith("__i3"):
+        var w = Worksp()
+        w.name = nm.str
+        let nu = node.getOrDefault("num")
+        if nu != nil and nu.kind == JInt: w.num = nu.num.int
+        let op = node.getOrDefault("output")
+        if op != nil and op.kind == JString: w.output = op.str
+        let fc = node.getOrDefault("focused")
+        if fc != nil and fc.kind == JBool: w.focused = fc.bval
+        let vi = node.getOrDefault("visible")
+        if vi != nil and vi.kind == JBool: w.visible = vi.bval
+        let ur = node.getOrDefault("urgent")
+        if ur != nil and ur.kind == JBool: w.urgent = ur.bval
+        outp.add w
     for key, child in node.pairs:
       if key in ["nodes", "floating_nodes"]:
         if child.kind == JArray:
