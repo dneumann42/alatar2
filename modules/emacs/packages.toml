@@ -1,4 +1,0 @@
-[[package]]
-name = "emacs-wayland"
-source = "arch"
-tags = ["dev", "editor"]

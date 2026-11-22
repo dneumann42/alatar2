@@ -26,7 +26,7 @@ proc loadModules*(moduleDir: string): seq[Module] {.raises: [IOError, OSError].}
       continue
     # Directories starting with "_" hold the module's own files (e.g. dotfiles
     # in desktop/_config), not submodules.
-    if lastPathPart(path).startsWith("_"):
+    if lastPathPart(path).startsWith("_") or lastPathPart(path).startsWith("."):
       continue
     var module = Module()
     module.name = lastPathPart(path)

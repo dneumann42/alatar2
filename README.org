@@ -143,3 +143,16 @@ Bootstrap contract:
   Both alatar and the statusbar therefore use the pure-Nim regex engine /
   plain string parsing and never dlopen pcre; alatar must run on a bare
   system, before any module has installed anything.
+
+* Bootstrap
+
+Run =./setup= on Arch Linux. It builds Alatar and the applications from
+[[https://github.com/dneumann42/alatar-applications][alatar-applications]].
+The application build chooses the GUI when SDL3 and Wayland development
+libraries are present. Set =ALATAR_APP_BACKEND=tui= to force terminal-only
+binaries, or =ALATAR_APP_BACKEND=gui= to require GUI support.
+
+Alatar reads modules from =$XDG_CONFIG_HOME/alatar/modules=, with
+=~/.config= as the fallback for XDG_CONFIG_HOME. Override the location with
+=ALATAR_MODULES_DIR= or =--dir=. For the Sway desktop configuration and its
+bar and tray build, see [[https://github.com/dneumann42/alatar-desktop][alatar-desktop]].

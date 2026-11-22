@@ -1,9 +1,0 @@
-["desktop/_config/(.*)"]
-to = "$HOME/.config/$1"
-
-["desktop/bash/profile"]
-to = "$HOME/.profile"
-
-["desktop/_config/bash/bashrc"]
-to = "$HOME/.bashrc"
-

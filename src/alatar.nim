@@ -15,15 +15,17 @@ const
     "$command --help-syntax gives general cligen syntax help.\n" &
     "Run \"$command {help SUBCMD|SUBCMD --help}\" for just SUBCMD.\n" &
     "Run \"$command help\" to get *comprehensive* help.$ifVersion"
-  dirHelp = "modules directory [env: ALATAR_MODULES_DIR; default: modules]"
+  dirHelp = "modules directory [env: ALATAR_MODULES_DIR; default: XDG config directory]"
 
 proc defaultModulesDir(): string =
   ## Read at call time so ALATAR_MODULES_DIR works at runtime, not compile
   ## time (the proc default `dir = defaultModulesDir()` is evaluated per
   ## dispatch).
-  getEnv("ALATAR_MODULES_DIR", "modules")
+  getEnv("ALATAR_MODULES_DIR", getConfigDir() / "alatar" / "modules")
 
 proc loadRegistry(dir: string): ModuleRegistery =
+  if not dirExists(dir):
+    quit "alatar: module directory missing: " & dir & "\nClone a module repository there or pass --dir.", 1
   try:
     result.load(dir)
   except CatchableError as e:

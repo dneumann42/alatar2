@@ -21,9 +21,8 @@ set -euo pipefail
 #              to prompt on (polkit agent dialog)
 #   sudo       alatar's primary elevation path: one password per terminal,
 #              cached by sudo and shared with paru's own sudo calls
-#   emacs      user preference
 sudo pacman -Syu --needed --noconfirm \
-    base-devel git curl pcre polkit sudo emacs
+    base-devel git curl pcre polkit sudo pkgconf
 
 ALATAR_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export ALATAR_HOME="${ALATAR_HOME:-$ALATAR_ROOT}"
@@ -37,9 +36,26 @@ fi
 source "$ALATAR_ROOT/lib/nim.sh"
 nim::ensure
 
-# Build alatar and put it on PATH alongside the nim toolchain.
+export PATH="$NIM_USER_BIN:$PATH"
+cd "$ALATAR_ROOT"
 nimble build
+
+ALATAR_SOURCE_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/alatar/sources"
+mkdir -p "$ALATAR_SOURCE_CACHE"
+source "$ALATAR_ROOT/lib/apps.sh"
+for repo in ellipse plugnim alatar-applications; do
+    alatar_checkout "$repo"
+done
+
+stage=$(mktemp -d)
+trap 'rm -rf -- "$stage"' EXIT
+"$ALATAR_SOURCE_CACHE/alatar-applications/build-apps" "${ALATAR_APP_BACKEND:-auto}" \
+    "$ALATAR_ROOT" "$ALATAR_SOURCE_CACHE/ellipse" "$ALATAR_SOURCE_CACHE/plugnim" "$stage"
 mkdir -p "$NIM_USER_BIN"
+for app in nomicon-settings nomicon-launcher systemdui processui; do
+    install -m 755 "$stage/$app" "$NIM_USER_BIN/.$app.new"
+    mv -fT "$NIM_USER_BIN/.$app.new" "$NIM_USER_BIN/$app"
+done
 ln -sf "$ALATAR_ROOT/bin/alatar" "$NIM_USER_BIN/alatar"
 
-printf 'alatar: setup complete - run "alatar install all" to set up your modules\n' >&2
+printf 'alatar: setup complete. Clone a module repository and run "alatar install all".\n' >&2
