@@ -1,14 +1,13 @@
 ## bar - the swaybar replacement, in ellipse_ui.
 ##
 ## One process per output (`--output NAME`, launched by
-## `_config/sway/scripts/bar.sh`), each a full-width top layer surface 20px
-## thick with an exclusive zone - exactly what swaybar reserved, and what
-## maximised windows stop at. Everything the old setup spread over three
+## `_config/sway/scripts/bar.sh`), each a full-width top layer surface
+## with an exclusive zone that maximised windows stop at. The bar combines
 ## moving parts (swaybar + its gaps + apps/tray strip + GTK barbuttons)
 ## lives inside this one surface:
 ##
 ##   [left buttons] [workspace pills] [binding-mode pill]  ...  [status
-##   blocks] [tray icons] [right buttons]
+##   blocks] [tray icons] [right buttons] [color mode]
 ##
 ##  * pills and the mode pill read sway's IPC (GET_TREE + a workspace/mode
 ##    subscription); clicking runs `workspace`, the wheel over them cycles
@@ -25,9 +24,7 @@
 ##  * buttons come from statusbar/buttons.toml, hot-reloaded like
 ##    barbuttons reloaded it.
 ##
-## Colours mirror bar.conf's `colors` block, read from the same files sway
-## does: appearance.conf seeds the defaults and the wallust include
-## overrides them, re-parsed whenever the wallpaper-driven theme changes.
+## Uses the shared Alatar desktop theme on each output.
 ##
 ## Usage: bar --output DP-1 [--tray]     one output's bar
 ##        bar --menu-child SVC PATH [UNIQUE] [--out NAME]   menu dialog
@@ -37,13 +34,14 @@ import ellipse_ui
 import ellipse_ui/keys
 import ellipse/platform/fdwatch
 import ellipse/platform/process
-import tray/theme                 # gothic palette, for the menu child only
 import tray/[dbusd, icons, sni, menu]
+import alatar/[desktopchrome, desktopmode, desktoptheme]
 
 import bar/[buttons, ipc, palette, statusline]
 
 const
-  barH = 20           ## swaybar's `height` (bar.conf)
+  barH = 24
+  modeToggleW = 56
   pillMinW = 42       ## swaybar's `workspace_min_width`
   pillPad = 5         ## swaybar's workspace-button horizontal padding
   statusPad = 8       ## swaybar's `status_padding` (gap between blocks)
@@ -68,6 +66,7 @@ type
     bus: Bus
     host: sni.Host
     openItem: TrayItem
+    openButton: ElementId
     child: ChildProcess
     childRunning: bool
     lastMiddle: bool
@@ -114,9 +113,11 @@ proc cycleWorkspace(b: Bar; dir: int) =
 
 proc closeMenu(b: Bar) =
   b.openItem = nil
+  b.openButton = ElementId()
   if b.childRunning:
     b.child.kill()
-    b.child.close()
+    firedProcs.add b.child
+    b.child = ChildProcess()
     b.childRunning = false
   requestFrame()
 
@@ -160,6 +161,7 @@ proc buttonsConfig(b: Bar) =
   var text = ""
   try: text = readFile(buttons.buttonsFile()) except CatchableError: discard
   if text == b.btnText: return
+  if b.openButton.id != 0: b.closeMenu()
   b.btnText = text
   b.cfg = buttons.parse(text)
 
@@ -169,6 +171,43 @@ proc runButton(b: Bar; btn: BarButton) =
   # exits, the real app lives on without us
   var p = spawnProcess(@["sh", "-c", btn.command & " >/dev/null 2>&1 & disown"])
   if p.running: firedProcs.add p
+
+proc runAttachedButton(b: Bar; btn: BarButton; id: ElementId) =
+  let wasOpen = b.openButton == id
+  b.closeMenu()
+  if wasOpen: return
+  let box = elementData(id).box
+  let outputWidth = int(layoutDimensions().width)
+  let margin = if btn.side == "left": max(0, int(box.x))
+               else: max(0, outputWidth - int(box.x + box.width))
+  b.child = spawnProcess(@["sh", "-c", "exec " & btn.attachCommand & " \"$@\"",
+    "bar-attachment", "--attach", b.output, btn.side, $margin, $outputWidth])
+  b.childRunning = b.child.running
+  if b.childRunning: b.openButton = id
+
+proc activateButton(b: Bar; btn: BarButton; id: ElementId) =
+  if btn.attachCommand.len > 0: b.runAttachedButton(btn, id)
+  else: b.runButton(btn)
+
+func buttonId(btn: BarButton; index: int): ElementId =
+  elementId((if btn.side == "left": "lbtn." else: "rbtn.") & $index)
+
+proc toggleColorMode(b: Bar) =
+  try:
+    setDarkMode(b.pal.light)
+    b.pal = palette.refresh()
+  except CatchableError as err:
+    stderr.writeLine("bar: could not save color mode: " & err.msg)
+
+proc activateShortcut(b: Bar; action: string) =
+  if action == "color-mode":
+    b.toggleColorMode()
+    return
+  if action.len == 0: return
+  for i, btn in b.cfg.items:
+    if btn.id == action:
+      b.activateButton(btn, buttonId(btn, i))
+      return
 
 proc tickFired() =
   var i = 0
@@ -219,17 +258,20 @@ proc blockClick(b: Bar; blk: Block; i: int) =
 
 # --- the main view ----------------------------------------------------------------
 
-proc pillColor(p: palette.Palette; w: Worksp): (Color, Color) =
-  ## (background, ink) for one workspace pill, bar.conf's colors block.
-  if w.focused: (c(p, "accent", rgb(137, 180, 250)),
-                 c(p, "bar_flat", rgb(0, 0, 0)))
-  elif w.urgent: (c(p, "urgent", rgb(243, 139, 168)),
-                  c(p, "bar_flat", rgb(0, 0, 0)))
-  elif w.visible or (w.focused and w.output == ""):
-    (c(p, "surface", rgb(32, 36, 46)), c(p, "text", rgb(230, 234, 242)))
-  else:
-    # inactive pills blend into the translucent bar, like swaybar's
-    (Color(), c(p, "muted", rgb(154, 164, 178)))
+proc launcher(b: Bar; btn: BarButton; id: ElementId) =
+  if clickedIn(id):
+    b.activateButton(btn, id)
+  let active = b.openButton == id
+  let hot = pointerOver(id) or pressing(id)
+  let ink = if active: activeTheme.palette.onAccent
+            elif hot: c(b.pal, "button_hover_fg", b.cfg.hoverForeground)
+            else: c(b.pal, "button_fg", b.cfg.foreground)
+  openElement(id, row(width = fixedPx(b.cfg.buttonWidth.float32), height = grow(),
+      padding = pressPadding(pressing(id)), alignX = centerX, alignY = centerY)
+      .chrome(if active: selected else: buttonChrome(id)))
+  if btn.glyph.len > 0:
+    textElement(btn.glyph, TextConfig(fontSize: b.cfg.fontSize.toPx.uint16, color: ink))
+  closeElement()
 
 proc view() =
   let b = br
@@ -237,8 +279,8 @@ proc view() =
   tickFired()
   b.buttonsConfig()
   b.pal = palette.refresh()
-  let p = b.pal
-  let barBg = c(p, "bar_bg", rgb(0, 0, 0, 217))
+  let toggle = elementId("bar.color-mode")
+  if clickedIn(toggle): b.toggleColorMode()
 
   if b.ipc.poll():
     discard
@@ -246,15 +288,22 @@ proc view() =
   b.sl.restartIfNeeded()
   b.handleInput()
 
-  # tray child exited on its own (chosen / dismissed): clear the open mark
-  if b.childRunning and b.openItem != nil and b.child.poll():
+  # The popup exited on its own. Clear its button's highlight.
+  if b.childRunning and b.child.poll():
     b.child.close()
     b.childRunning = false
     b.openItem = nil
+    b.openButton = ElementId()
 
-  # keep the 1s heartbeat (clock, buttons.toml poll) and a faster one while
-  # icon jobs decode
-  requestFrameIn(200_000_000'i64)
+  for action in b.ipc.takeButtonActions():
+    b.activateShortcut(action)
+  let p = b.pal
+  let ink = c(p, "text", rgb(230, 234, 242))
+  let accentInk = c(p, "bar_flat", rgb(0, 0, 0))
+  p.applyChrome()
+
+  # Poll theme and button changes across the independent output processes.
+  requestFrameIn(themeFrameInterval)
 
   var items: seq[TrayItem] = @[]
   if b.trayHost and b.host != nil: items = b.host.snapshot
@@ -272,14 +321,14 @@ proc view() =
   for btn in b.cfg.items:
     if btn.side == "left": inc nLeft else: inc nRight
   var cost = float32(nLeft + nRight) * b.cfg.buttonWidth.float32
-  cost += float32(edgePad)
+  cost += float32(edgePad + modeToggleW)
   var pillCost = 0'f32
   for w in shown:
     pillCost += max(pillMinW.float32, measureText(w.name,
         TextConfig(fontSize: fontPx.uint16)).width + 2 * pillPad.float32)
   cost += pillCost
   if b.ipc.modeName != "default" and b.ipc.modeName.len > 0:
-    cost += measureText(b.ipc.modeName, TextConfig(fontSize: fontPx.uint16)).width
+    cost += 8 + measureText(b.ipc.modeName, TextConfig(fontSize: fontPx.uint16)).width
   if items.len > 0:
     cost += 4'f32 + items.len.float32 * slotW.float32 +
       float32(items.len - 1) * 2'f32          # padding + gaps of the tray row
@@ -287,7 +336,7 @@ proc view() =
   var statusCost = 0'f32
   for i, blk in b.sl.blocks:
     let runs = statusline.parseRuns(statusline.nerdify(blk.fullText),
-                                     c(p, "text", rgb(230, 234, 242)))
+                                     c(p, "text", rgb(230, 234, 242)), p)
     var total = 0'f32
     for r in runs:
       total += measureText(r.text, TextConfig(fontSize: fontPx.uint16,
@@ -304,45 +353,42 @@ proc view() =
 
   # layout rows: [left buttons][pills][mode] ... [status][icons][right btns]
   clay "bar", row(width = grow(), height = fixedPx(barH), gap = 0,
-      padding = padAll(0))
-      .bg(barBg):
+      padding = Padding(top: 2, bottom: 2))
+      .chrome(panel):
 
     # --- left buttons ---
     for i, btn in b.cfg.items:
       if btn.side != "left": continue
-      let bid = elementId("lbtn." & $i)
-      let over = pointerOver(bid)
-      openElement(bid, row(width = fixedPx(b.cfg.buttonWidth.float32), height = grow(),
-          alignX = centerX, alignY = centerY)
-          .bg(if over: b.cfg.hoverBackground else: Color()))
-      if btn.glyph.len > 0:
-        textElement(btn.glyph, TextConfig(fontSize: b.cfg.fontSize.toPx.uint16,
-          color: if over: b.cfg.hoverForeground else: b.cfg.foreground))
-      closeElement()
-      if clickedIn(bid): b.runButton(btn)
+      b.launcher(btn, buttonId(btn, i))
 
     # --- workspace pills ---
     clay "pills", row(width = fit(), height = grow(), gap = 0,
         alignY = centerY):
       for w in shown:
         let wid = elementId("ws." & w.name)
-        let (bg, ink) = pillColor(p, w)
+        let down = pressing(wid) or w.focused or w.visible
+        let look = if w.urgent: attention
+                   elif w.focused: selected
+                   elif down: pressedButton
+                   else: buttonChrome(wid)
+        let workspaceInk = if w.urgent: contrastingInk(p.urgent, accentInk)
+                           elif w.focused: accentInk else: ink
         let tw = measureText(w.name, TextConfig(fontSize: fontPx.uint16)).width
         let cw = max(pillMinW.float32, tw + 2 * pillPad.float32)
         openElement(wid, row(width = fixedPx(cw), height = grow(),
-            alignX = centerX, alignY = centerY)
-            .bg(bg))
-        textElement(w.name, TextConfig(fontSize: fontPx.uint16, color: ink))
+            padding = pressPadding(down), alignX = centerX, alignY = centerY)
+            .chrome(look))
+        textElement(w.name, TextConfig(fontSize: fontPx.uint16, color: workspaceInk))
         closeElement()
         if clickedIn(wid): b.gotoWorkspace(w.name)
 
     # --- binding-mode indicator (the "resize" pill) ---
     if b.ipc.modeName != "default" and b.ipc.modeName.len > 0:
       clay "mode", row(width = fit(), height = grow(), alignX = centerX,
-          alignY = centerY)
-          .bg(c(p, "accent2", rgb(116, 199, 236))):
+          alignY = centerY, padding = Padding(left: 4, right: 4))
+          .chrome(bindingMode):
         textElement(b.ipc.modeName, TextConfig(fontSize: fontPx.uint16,
-          color: c(p, "bar_flat", rgb(0, 0, 0))))
+          color: contrastingInk(p.accent2, accentInk)))
 
     # --- push the status group to the right edge ---
     openElement(elementId("space"), row(width = grow(), height = grow()))
@@ -393,10 +439,10 @@ proc view() =
           padding = padAll(2), alignY = centerY):
         for it in items:
           let sid = elementId("slot." & it.itemKey)
-          let over = pointerOver(sid)
+          let active = b.openItem != nil and b.openItem.itemKey == it.itemKey
           openElement(sid, row(width = fixedPx(slotW), height = grow(),
               alignX = centerX, alignY = centerY)
-              .bg(if over: shade(true, pressing(sid)) else: Color()))
+              .chrome(if active: selected else: buttonChrome(sid)))
           closeElement()
           if clickedIn(sid):
             b.activateOrMenu(it)
@@ -404,16 +450,14 @@ proc view() =
     # --- right buttons ---
     for i, btn in b.cfg.items:
       if btn.side != "right": continue
-      let bid = elementId("rbtn." & $i)
-      let over = pointerOver(bid)
-      openElement(bid, row(width = fixedPx(b.cfg.buttonWidth.float32), height = grow(),
-          alignX = centerX, alignY = centerY)
-          .bg(if over: b.cfg.hoverBackground else: Color()))
-      if btn.glyph.len > 0:
-        textElement(btn.glyph, TextConfig(fontSize: b.cfg.fontSize.toPx.uint16,
-          color: if over: b.cfg.hoverForeground else: b.cfg.foreground))
-      closeElement()
-      if clickedIn(bid): b.runButton(btn)
+      b.launcher(btn, buttonId(btn, i))
+
+    openElement(toggle, row(width = fixedPx(modeToggleW), height = grow(),
+        padding = pressPadding(pressing(toggle)), alignX = centerX, alignY = centerY)
+        .chrome(buttonChrome(toggle)))
+    textElement(if p.light: "Light" else: "Dark",
+      TextConfig(fontSize: 13, fontId: MonoFont, color: ink))
+    closeElement()
 
 # --- the overlay pass: icon textures over the clay picture -----------------------
 
@@ -422,7 +466,7 @@ proc overlay() =
   # button icons first (they are plain files; glyph buttons draw in clay)
   for i, btn in b.cfg.items:
     if btn.icon.len == 0: continue
-    let bid = elementId((if btn.side == "left": "lbtn." else: "rbtn.") & $i)
+    let bid = buttonId(btn, i)
     let box = elementData(bid).box
     if box.width <= 0: continue
     let icon = icons.loadIconFile(btn.icon)
@@ -433,16 +477,18 @@ proc overlay() =
                    cell / max(1'f32, max(float32(icon.w), float32(icon.h))))
       let w = float32(icon.w) * sc
       let h = float32(icon.h) * sc
-      overlayIcon(icon, rect(box.x + box.width / 2 - w / 2,
-                             box.y + box.height / 2 - h / 2, w, h))
+      let shift = if pressing(bid): 1'f32 else: 0'f32
+      overlayIcon(icon, rect(box.x + box.width / 2 - w / 2 + shift,
+                             box.y + box.height / 2 - h / 2 + shift, w, h))
   if not (b.trayHost and b.host != nil): return
   let p = b.pal
   for it in b.host.snapshot:
     let sid = elementId("slot." & it.itemKey)
     let box = elementData(sid).box
     if box.width <= 0: continue   # first frame before clay has measured
-    let cx = box.x + box.width / 2
-    let cy = box.y + box.height / 2
+    let shift = if pressing(sid): 1'f32 else: 0'f32
+    let cx = box.x + box.width / 2 + shift
+    let cy = box.y + box.height / 2 + shift
     let icon = icons.iconFor(it)
     if icon != nil:
       let sc = min(float32(slotH) / float32(icon.w),
@@ -473,6 +519,7 @@ proc dbusWake() {.gcsafe.} =
 
 proc setup() =
   let b = br
+  installChrome()
   discard b.ipc.poll()            # first connect + subscribe + tree
   b.sl = statusline.newStatusLine()
   setOverlay(overlay)
@@ -512,6 +559,7 @@ func prefixOf(e: menu.MenuEntry): string =
 var mch {.threadvar.}: Bar   # reuse the record for the child's few fields
 
 proc menuChildSetup() =
+  installChrome()
   proc got(entries: seq[menu.MenuEntry]) =
     mch.fetching = false
     mch.entries = entries
@@ -532,7 +580,7 @@ proc menuChildSetup() =
         menu.fetchMenu(b, mch.menuSvc, mch.menuPath, got2)
 
 proc menuChildView() =
-  setTheme(gothicTheme(true))
+  applyDesktopTheme(darkMode())
   let t = activeTheme
   if pressed("Escape"):
     platform.quit()
@@ -541,7 +589,7 @@ proc menuChildView() =
     if e.visible: inc rows
   clay "menuwin", col(width = fixedPx(menuW), height = grow(),
       gap = 0, padding = padAll(2))
-      .bg(t.palette.panelBg)
+      .chrome(panel)
       .border(t.metrics.borderHairline, t.palette.panelBorder):
     if mch.fetching and rows == 0:
       clay "menu.wait", row(width = grow(), height = fixedPx(menuRowH),
@@ -595,11 +643,11 @@ proc menuChild(service, path, unique, output: string) =
   run App(window: WindowConfig(
       title: "tray-menu",
       width: menuW, height: 60,
-      resizable: false,
+      resizable: false, transparent: true,
       layer: LayerConfig(
         enabled: true, edge: edgeTop, level: layerOverlay,
         thickness: 60, length: menuW, exclusive: 0,
-        anchorEnd: true, marginEnd: mr,
+        anchorEnd: true, marginEnd: mr + modeToggleW,
         keyboard: keyboardExclusive, namespace: "alatar-tray-menu",
         output: output)),
     debugMode: false,
@@ -626,7 +674,7 @@ when isMainModule:
     menuChild(rest[1], rest[2], unique, outp)
     quit 0
   br = Bar(output: outp, trayHost: "--tray" in all,
-           ipc: ipc.newIpc(), ipcWatch: -1)
+           ipc: ipc.newIpc(outp), ipcWatch: -1)
   # fonts: the Nerd Font the old swaybar used, at every size; the MonoFont
   # slot doubles as the bold face (the status line's `<b>`)
   fontPath = "/usr/share/fonts/TTF/JetBrainsMonoNerdFont-Regular.ttf"
@@ -634,7 +682,7 @@ when isMainModule:
   run App(window: WindowConfig(
         title: "bar" & (if outp.len > 0: "@" & outp else: ""),
         width: 1280, height: barH,
-        resizable: false,
+        resizable: false, transparent: true,
         layer: LayerConfig(
           enabled: true, edge: edgeTop, level: layerTop,
           thickness: barH.int32, length: 0, exclusive: barH.int32,

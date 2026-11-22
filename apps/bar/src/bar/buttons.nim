@@ -15,7 +15,7 @@ type
   BarButton* = ref object
     side*: string      ## "left" | "right"
     icon*: string      ## resolved file path ("" if none)
-    glyph*, command*: string
+    id*, glyph*, command*, attachCommand*: string
 
   ButtonsCfg* = object
     buttonWidth*: int
@@ -124,10 +124,12 @@ proc parse*(text: string): ButtonsCfg =
     let val = unq(line[eq + 1 ..^ 1])
     if cur != nil:
       case key
+      of "id": cur.id = val
       of "side": cur.side = val
       of "icon": cur.icon = if not val.startsWith("/"): dir / val else: val
       of "glyph": cur.glyph = val
       of "command": cur.command = val
+      of "attach_command": cur.attachCommand = val
       else: discard
     else:
       case key

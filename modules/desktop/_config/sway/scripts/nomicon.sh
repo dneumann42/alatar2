@@ -1,11 +1,6 @@
 #!/usr/bin/env sh
 # ============================================================================
-# sway launcher for nomicon (apps/nomicon, the ellipse GUI app): focus its
-# window if one exists, else build on demand and launch it.
-#
-# Build logic mirrors bar-buttons.sh: nimble when the binary is missing or
-# any source/nimble file is newer. `--offline` keeps reloads fast; drop the
-# flag once when a fresh ellipse checkout must be fetched over ssh.
+# Build and launch Nomicon Launcher or Nomicon Settings.
 #
 # ellipse sets the Wayland app_id to org.ellipse.platform for every app
 # (platform.nim, SDL_SetAppMetadata), so the nomicon window is identified
@@ -15,31 +10,22 @@ set -u
 
 here="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
 proj="$here/../../../../../apps/nomicon"
-bin="$proj/bin/nomicon"
+target=nomicon-settings
+if [ "${1:-}" = "--launcher" ]; then
+    target=nomicon-launcher
+    shift
+fi
+bin="$proj/bin/$target"
 
-if swaymsg -t get_tree 2>/dev/null | grep -q '"nomicon"'; then
-    exec swaymsg '[app_id="org.ellipse.platform" title="^nomicon$"] focus'
+if [ "${1:-}" != "--attach" ] &&
+        swaymsg -t get_tree 2>/dev/null | grep -Fq "\"$target\""; then
+    exec swaymsg "[app_id=\"org.ellipse.platform\" title=\"^${target}\$\"] focus"
 fi
 
-# needs_build=0
-# if [ ! -x "$bin" ]; then
-#     needs_build=1
-# elif [ -n "$(find "$proj/src" "$proj/nomicon.nimble" -newer "$bin" 2>/dev/null | head -n1)" ]; then
-#     needs_build=1
-# fi
-# 
-# if [ "$needs_build" = 1 ]; then
-#     command -v nimble >/dev/null 2>&1 || {
-#         echo "nomicon: $bin not built and nimble unavailable (PATH: $PATH)" >&2
-#         exit 1
-#     }
-#     log="$proj/build.log"
-#     if (cd "$proj" && nimble --offline build) >"$log" 2>&1; then
-#         rm -f "$log"
-#     else
-#         echo "nomicon: nimble build failed, see $log" >&2
-#         exit 1
-#     fi
-# fi
+if [ ! -x "$bin" ] || [ -n "$(find "$proj/src" "$proj/config.nims" \
+        "$proj/nomicon.nimble" "$proj"/../../src/alatar/desktop*.nim \
+        -newer "$bin" 2>/dev/null | head -n1)" ]; then
+    (cd "$proj" && nimble build "$target") >&2 || [ -x "$bin" ] || exit 1
+fi
 
-exec "$bin"
+exec "$bin" "$@"

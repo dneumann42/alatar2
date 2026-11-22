@@ -2,3 +2,5 @@
 
 echo "$XDG_CONFIG_HOME"
 echo "Hello, Dustin"
+# Suppress Sway's startup banner for proprietary GPU drivers.
+export SWAY_UNSUPPORTED_GPU=true

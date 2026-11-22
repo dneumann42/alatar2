@@ -19,6 +19,16 @@ source = "arch"
 tags = ["wayland", "system"]
 
 [[package]]
+name = "xdg-desktop-portal-gtk"
+source = "arch"
+tags = ["wayland", "system"]
+
+[[package]]
+name = "python-gobject"
+source = "arch"
+tags = ["gui", "libs"]
+
+[[package]]
 name = "xorg-xwayland"
 source = "arch"
 tags = ["wayland"]

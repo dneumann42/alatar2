@@ -13,6 +13,8 @@
 
 import std/[os, strutils, json, posix]
 import ellipse_ui
+import ./palette
+import "../../../../modules/desktop/_config/sway/statusbar/src/statusbar/palette" as statusColors
 
 {.push gcsafe.}
 
@@ -50,19 +52,15 @@ proc exitChild(status: cint) {.
 
 # --- colour + entity helpers --------------------------------------------------
 
-proc hexColor(s: string): Color =
-  var h = s.strip
-  if h.startsWith('#'): h = h[1..^1]
-  template byte(x: string): float32 = float32(parseHexInt(x))
-  try:
-    case h.len
-    of 3: rgb(byte(h[0..0] & h[0..0]), byte(h[1..1] & h[1..1]),
-              byte(h[2..2] & h[2..2]))
-    of 6: rgb(byte(h[0..1]), byte(h[2..3]), byte(h[4..5]))
-    of 8: rgb(byte(h[0..1]), byte(h[2..3]), byte(h[4..5]), byte(h[6..7]))
-    else: Color()
-  except ValueError:
-    Color()
+proc spanColor(value: string; p: palette.Palette): Color =
+  let fallback = hexColor(value)
+  case value
+  of statusColors.cAccent: p.get("accent", fallback)
+  of statusColors.cAccent2: p.get("accent2", fallback)
+  of statusColors.cText: p.get("text", fallback)
+  of statusColors.cMuted: p.get("muted", fallback)
+  of statusColors.cUrgent: p.get("urgent", fallback)
+  else: fallback
 
 proc unescape(s: string): string =
   result = s.replace("&lt;", "<")
@@ -92,8 +90,8 @@ proc nerdify*(s: string): string =
 
 # --- pango subset -> runs -----------------------------------------------------
 
-proc parseRuns*(text: string, defCol: Color): seq[Run] =
-  var colorStack: seq[Color]
+proc parseRuns*(text: string; defCol: Color; p: palette.Palette): seq[Run] =
+  var colorStack = @[defCol]
   var cur = defCol
   var bold = 0
   var i = 0
@@ -128,7 +126,7 @@ proc parseRuns*(text: string, defCol: Color): seq[Run] =
         if q >= 0:
           let s = q + 7
           let e = tag.find('"', s)
-          if e > s: col = hexColor(tag[s ..< e])
+          if e > s: col = spanColor(tag[s ..< e], p)
         colorStack.add col
         cur = col
       else:

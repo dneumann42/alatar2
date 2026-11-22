@@ -37,7 +37,10 @@ needs_build=0
 if [ ! -x "$bin" ]; then
     needs_build=1
 elif [ -n "$(find "$proj/src" "$proj/bar.nimble" "$proj/config.nims" \
-        "$here/../../../../../apps/tray/src" -newer "$bin" 2>/dev/null \
+        "$here/../../../../../apps/tray/src" \
+        "$here/../../../../../src/alatar/desktopchrome.nim" \
+        "$here/../../../../../src/alatar/desktopmode.nim" \
+        "$here/../../../../../src/alatar/desktoptheme.nim" -newer "$bin" 2>/dev/null \
         | head -n1)" ]; then
     needs_build=1
 fi

@@ -19,6 +19,7 @@ when defined(posix):
   import std/[os, strutils]
 
   let home = getEnv("HOME", "/root")
+  switch("path", thisDir() / ".." / ".." / "src")
   switch("path", getEnv("ALATAR_SRC", home) /
          ".alatar" / "apps" / "tray" / "vendor" / "tinydbus")
   switch("path", home / ".alatar" / "apps" / "tray" / "src")

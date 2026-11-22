@@ -54,8 +54,8 @@ func mix(a, b: Color, t: float32): Color =
 # reparsed when its text differs from last time - cheap enough for the
 # immediate-mode loop, and it catches a wallpaper switch without a hook.
 
-var cachedText: string
-var cachedColors: Table[string, Color]
+var cachedText {.threadvar.}: string
+var cachedColors {.threadvar.}: Table[string, Color]
 
 proc wallustColors(): Table[string, Color] =
   let path =

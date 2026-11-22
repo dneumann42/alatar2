@@ -1,4 +1,4 @@
-## sway IPC client: GET_TREE + GET_WORKSPACES + the workspace/mode event
+## sway IPC client: GET_TREE + GET_WORKSPACES + workspace, mode and binding event
 ## subscription, over a non-blocking AF_UNIX socket, drained from the frame
 ## loop (and woken by `fdwatch` in bar.nim). The i3-ipc wire format: the
 ## literal "i3-ipc", a u32 LE payload length, a u32 LE message type, then
@@ -23,12 +23,15 @@ const
                            ## their state from this reply, keyed by name, and
                            ## merely use the tree for list membership+order.
   i3GetTree = 4'u32
+  i3GetOutputs = 3'u32
   i3Subscribe = 2'u32
   eventMask = 0x80000000'u32
   evWorkspace = 0'u32
   evMode = 2'u32         ## i3/sway: 0 workspace, 1 output, 2 mode
+  evBinding = 5'u32
   evShutdown = 7'u32
   reconnectNs = 2_000_000_000'i64
+  barBinding = "nop alatar-bar "
 
 type
   Worksp* = ref object
@@ -48,6 +51,9 @@ type
     wsFlags: Table[string, WsFlag]
     alive*: bool
     lastTry: int64        ## monoNs of the last connect attempt
+    pendingButtons: seq[string]
+    buttonActions: seq[string]
+    output: string
 
 proc u32le(x: uint32): string =
   result = newString(4)
@@ -103,7 +109,8 @@ proc connect(ipc: Ipc): bool =
   ipc.fd = fd
   ipc.alive = true
   ipc.rbuf.setLen(0)
-  ipc.sendMsg(i3Subscribe, """["workspace","mode"]""")
+  ipc.pendingButtons.setLen(0)
+  ipc.sendMsg(i3Subscribe, """["workspace","mode","binding"]""")
   ipc.refresh()
   true
 
@@ -181,8 +188,28 @@ proc handleFrame(ipc: Ipc; msgType: uint32; payload: string): bool =
         ipc.modeName = if ch != nil and ch.kind == JString: ch.str else: "default"
         result = true
       except CatchableError: discard
+    of evBinding:
+      try:
+        let binding = payload.parseJson{"binding"}
+        if binding != nil:
+          let command = binding{"command"}.getStr()
+          if command.startsWith(barBinding):
+            # Each output receives the binding. Ask Sway which one has focus
+            # so only that output's bar runs the action.
+            ipc.pendingButtons.add(command[barBinding.len .. ^1])
+            ipc.sendMsg(i3GetOutputs, "")
+      except CatchableError: discard
     of evShutdown: ipc.alive = false
     else: discard
+  elif msgType == i3GetOutputs and ipc.pendingButtons.len > 0:
+    let action = ipc.pendingButtons[0]
+    ipc.pendingButtons.delete(0)
+    try:
+      for output in payload.parseJson:
+        if output{"focused"}.getBool() and output{"name"}.getStr() == ipc.output:
+          ipc.buttonActions.add(action)
+          return true
+    except CatchableError: discard
   elif msgType == i3GetTree:
     ipc.workspaces = parseWorkspaces(payload)
     applyFlags(ipc)
@@ -231,8 +258,11 @@ proc poll*(ipc: Ipc): bool =
 proc runCommand*(ipc: Ipc; cmd: string) =
   ipc.sendMsg(i3RunCommand, cmd)
 
-proc newIpc*(): Ipc =
-  Ipc(fd: SocketHandle(-1), modeName: "default", alive: false, lastTry: 0)
+proc takeButtonActions*(ipc: Ipc): seq[string] =
+  swap(result, ipc.buttonActions)
+
+proc newIpc*(output: string): Ipc =
+  Ipc(fd: SocketHandle(-1), modeName: "default", output: output)
 
 proc fd*(ipc: Ipc): int32 =
   ## The socket descriptor for `fdwatch`; -1 while disconnected.

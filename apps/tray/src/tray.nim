@@ -58,7 +58,7 @@ type
     fetching: bool                  # child side only
     reqW, reqH: int32
     reqMR: int32         # last right margin pushed to the compositor
-    dark: bool
+    lightOverride: bool
     dirty: bool
 
 var tr {.threadvar.}: Tray
@@ -68,7 +68,7 @@ var tr {.threadvar.}: Tray
 proc initTrayDefaults() =
   tr = Tray(bus: nil, host: nil,
             openItem: nil, entries: @[], fetching: false,
-            reqW: -1, reqH: -1, reqMR: -1, dark: true, dirty: false)
+            reqW: -1, reqH: -1, reqMR: -1, dirty: false)
 initTrayDefaults()
 
 # --- shared icon plumbing: see tray/icons.nim (theme files + pixmaps) -------
@@ -235,7 +235,7 @@ proc view() =
   tickIconJobs()
   syncButtons()
   requestFrameIn(1_000_000_000'i64)  # keep the buttons.toml poll alive
-  setTheme(gothicTheme(tr.dark))
+  setTheme(gothicTheme(not tr.lightOverride and systemDarkMode()))
   let t = activeTheme
   let items = tr.host.snapshot
 
@@ -328,7 +328,7 @@ proc menuChildSetup() =
         menu.fetchMenu(b, tr.menuSvc, tr.menuPath, got2)
 
 proc menuChildView() =
-  setTheme(gothicTheme(tr.dark))
+  setTheme(gothicTheme(not tr.lightOverride and systemDarkMode()))
   let t = activeTheme
   if pressed("Escape"):
     platform.quit()
@@ -374,7 +374,7 @@ proc menuChild(service, path, unique: string) =
   tr.menuSvc = service
   tr.menuPath = path
   tr.menuUnique = unique
-  if getEnv("TRAY_LIGHT") == "1": tr.dark = false
+  if getEnv("TRAY_LIGHT") == "1": tr.lightOverride = true
   tr.reqW = menuW.int32
   tr.bus = newBus()
   let bus = tr.bus
@@ -520,7 +520,7 @@ when isMainModule:
     menuChild(paramStr(2), paramStr(3), extra)
   else:
     for a in commandLineParams():
-      if a == "--light": tr.dark = false
+      if a == "--light": tr.lightOverride = true
     run App(window: WindowConfig(
           title: "tray",
           width: 26, height: stripH,

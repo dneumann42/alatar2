@@ -8,7 +8,12 @@ type
   PowerMode* = enum
     pmBalanced, pmSaver, pmPerformance
 
+  SettingsGroup* = enum
+    settingsWifi, settingsWired, settingsBluetooth, settingsDisplays,
+    settingsOutput, settingsInput
+
   State* = ref object
+    pending*: set[SettingsGroup]
     sinks*: seq[AudioNode]
     sources*: seq[AudioNode]
     networks*: seq[WifiNetwork]
@@ -22,6 +27,7 @@ type
     btAvailable*: bool
     airplane*: bool
     nightLight*: bool
+    themeError*: string
     darkStyle*: bool
     monitorName*: string
     monitorOn*: bool

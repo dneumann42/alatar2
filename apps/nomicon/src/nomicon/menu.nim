@@ -1,14 +1,15 @@
 import ellipse_ui
+import alatar/[desktopchrome, desktoptheme]
 
 import ./actions
 import ./state
 import ./widgets
 
 proc service(s: State, key, title, status: string, active: bool,
-             panel: Panel, action: proc (s: State),
-             width: SizingAxis = grow()) =
-  case quickButton(elementId(key), title, status, active,
-                   open = s.panel == panel, width = width):
+             panel: Panel, action: proc (s: State) {.gcsafe.},
+             width: SizingAxis = grow(), enabled = true) =
+  case quickButton(elementId(key), title, (if enabled: status else: "Loading…"),
+                   active and enabled, enabled = enabled, open = s.panel == panel, width = width):
   of bhToggle: action(s)
   of bhExpand: s.setPanel(panel)
   of bhNone: discard
@@ -23,8 +24,10 @@ proc sourceRow(key: string, title: string, status: string,
               width = grow()) == bhToggle
 
 proc plain(s: State, key, title, status: string, active: bool,
-           action: proc (s: State)) =
-  if sourceRow(key, title, status, active):
+           action: proc (s: State) {.gcsafe.}, enabled = true) =
+  if quickButton(elementId(key), title, (if enabled: status else: "Loading…"),
+                 active and enabled, arrow = false, width = grow(),
+                 enabled = enabled) == bhToggle:
     action(s)
 
 proc note(s: State) =
@@ -118,14 +121,14 @@ proc toggleGrid(s: State) =
   clay "grid", col(width = grow(), gap = 8):
     clay "grid.net", row(width = grow(), gap = 8):
       service(s, "wifi", "Wi-Fi", s.wifiSubtitle, s.wifiOn, panelWifi,
-              toggleWifi)
+              toggleWifi, enabled = settingsWifi notin s.pending)
       service(s, "wired", "Wired", s.wiredSubtitle, s.wiredOn, panelWired,
-              toggleWired)
+              toggleWired, enabled = settingsWired notin s.pending)
     if s.panel in {panelWifi, panelWired}:
       panelCard(s)
     clay "grid.sys", row(width = grow(), gap = 8):
       service(s, "bt", "Bluetooth", s.btSubtitle, s.btOn, panelBluetooth,
-              toggleBluetooth)
+              toggleBluetooth, enabled = settingsBluetooth notin s.pending)
       service(s, "power", "Power Mode", powerLabel(s.powerMode),
               s.powerMode != pmBalanced, panelPower, togglePower)
     if s.panel in {panelBluetooth, panelPower}:
@@ -138,11 +141,12 @@ proc toggleGrid(s: State) =
             if s.darkStyle: "On" else: "Off", s.darkStyle, toggleDarkStyle)
     clay "grid.misc", row(width = grow(), gap = 8):
       plain(s, "airplane", "Airplane Mode",
-            if s.airplane: "On" else: "Off", s.airplane, toggleAirplane)
+            if s.airplane: "On" else: "Off", s.airplane, toggleAirplane, enabled =
+              (s.pending * {settingsWifi, settingsWired, settingsBluetooth}) == {})
       plain(s, "backlight", "Keyboard", s.backlightLabel,
             s.backlight > 0, cycleBacklight)
       plain(s, "monitor", "Monitor Mode", s.monitorSubtitle,
-            s.monitorOn, toggleMonitor)
+            s.monitorOn, toggleMonitor, enabled = settingsDisplays notin s.pending)
       plain(s, "wallpaper", "Wallpaper", "Shift+Super+W", false,
             switchWallpaper)
 
@@ -155,22 +159,24 @@ proc brightnessRow(s: State) =
 proc audioRows(s: State) =
   clay "audio", col(width = grow(), gap = 8):
     clay "audio.out", row(width = grow(), gap = 6, alignY = centerY):
+      let outputReady = settingsOutput notin s.pending
       service(s, "sound", "Sound", s.sinkSubtitle,
               not s.defaultSink.muted, panelOutput, toggleMute,
-              width = fixedPx(140))
+              width = fixedPx(140), enabled = outputReady)
       let volume = slider(hashId("sound.slider"), s.volumeUi,
-                          dimmed = s.defaultSink.muted)
+                          dimmed = not outputReady or s.defaultSink.muted, enabled = outputReady)
       s.volumeUi = volume.value
       if volume.committed:
         s.setSinkVolume(volume.value)
     if s.panel == panelOutput:
       panelCard(s)
     clay "audio.in", row(width = grow(), gap = 6, alignY = centerY):
+      let inputReady = settingsInput notin s.pending
       service(s, "mic", "Input", s.micSubtitle,
               not s.defaultSource.muted, panelInput, toggleMicMute,
-              width = fixedPx(140))
+              width = fixedPx(140), enabled = inputReady)
       let mic = slider(hashId("mic.slider"), s.micUi,
-                       dimmed = s.defaultSource.muted)
+                       dimmed = not inputReady or s.defaultSource.muted, enabled = inputReady)
       s.micUi = mic.value
       if mic.committed:
         s.setMicVolume(mic.value)
@@ -184,13 +190,36 @@ proc backgroundRow(s: State) =
   if s.panel == panelBackground:
     panelCard(s)
 
+proc themeRow(s: State) =
+  let options = themeNames()
+  let current = options.find(selectedTheme())
+  clay "theme.row", row(width = grow(), gap = 8, alignY = centerY):
+    clay "theme.label", col(width = fixedPx(132)):
+      caption("Theme")
+    let choice = comboBox(hashId("desktop.theme"), options, current)
+    if choice != current and choice in 0 ..< options.len:
+      try:
+        selectTheme(options[choice])
+        s.themeError = ""
+      except CatchableError as error:
+        s.themeError = error.msg
+  if s.themeError.len > 0:
+    caption(s.themeError)
+
 proc render*(s: State) =
-  clay "menu", col(width = grow(), height = grow(), padding = padAll(12),
-      gap = 8)
-      .clip(horizontal = false, vertical = true,
-            childOffset = currentScrollOffset()):
-    toggleGrid(s)
-    brightnessRow(s)
-    audioRows(s)
-    backgroundRow(s)
-    scrollbar(hashId("menu.bar"), hashId("menu"))
+  let t = activeTheme
+  clay "settings", col(width = grow(), height = grow(), padding = padAll(6), gap = 4)
+      .chrome(panel):
+    clay "settings.title", row(width = grow(), height = fixedPx(29),
+        padding = Padding(left: 8), alignY = centerY).chrome(selected):
+      textElement("Nomicon Settings", TextConfig(fontSize: t.text.menu, fontId: MonoFont,
+        color: t.palette.onAccent))
+    clay "menu", col(width = grow(), height = grow(), padding = padAll(6), gap = 8)
+        .clip(horizontal = false, vertical = true,
+              childOffset = currentScrollOffset()):
+      themeRow(s)
+      toggleGrid(s)
+      brightnessRow(s)
+      audioRows(s)
+      backgroundRow(s)
+      scrollbar(hashId("menu.bar"), hashId("menu"))

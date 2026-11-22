@@ -1,18 +1,17 @@
-# Package
+import std/tables
 
 version       = "0.1.0"
-description   = "Nomicon: alatar's GUI apps on the ellipse kit (SDL3 + clay immediate-mode UI)."
+description   = "Nomicon Settings for Alatar"
 license       = "MIT"
 author        = "dneumann"
 
 srcDir        = "src"
-bin           = @["nomicon"]
+namedBin      = {"nomicon": "nomicon-settings", "launcher": "nomicon-launcher"}.toTable
 binDir        = "bin"
 
 requires "nim >= 2.4.0"
 
-# ellipse lives in a private repo, so the dependency is an ssh URL (nimble
-# clones with your ssh key); the ref pins the tested main commit - bump it
-# when ellipse moves. Its own deps (chroma, sdl3, plugnim) resolve from
-# nimble's package list / public git URLs.
-requires "ssh://git@github.com/dneumann42/ellipse#03fa577e00cc61c25b97d604e86d72084ce728b9"
+# config.nims selects the desktop's patched ellipse checkout.
+requires "chroma >= 1.0.0"
+requires "https://github.com/nim-lang/sdl3#bb137829ff619b0a27a473628cb28fc1c86f3fe5"
+requires "https://github.com/dneumann42/plugnim#fb9605750fff720873c501ff4710ab4322f0f6a4"

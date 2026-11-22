@@ -1,4 +1,5 @@
 import ellipse_ui
+import alatar/desktopchrome
 
 type ButtonHit* = enum
   bhNone, bhToggle, bhExpand
@@ -7,7 +8,7 @@ type SliderChange* = object
   value*: int
   committed*: bool
 
-var held: seq[uint32]
+var held {.threadvar.}: seq[uint32]
 
 const sliderTrackMax = 420.0  ## Slider tracks stop here: inside the horizontal
                               ## scroll region, grow() clamps to content width,
@@ -43,19 +44,21 @@ proc disclosure(open: bool, ink: Color) =
       if not open: chisel(th, arm, ink)
 
 widget focusable quickButton(title: string, subtitle: string, active: bool,
-                             open = false, arrow = true, width = fit()) -> ButtonHit:
+                             open = false, arrow = true, width = fit(),
+                             enabled = true) -> ButtonHit:
   let t = activeTheme
-  let over = pointerOver(id)
-  let press = pressing(id)
   let arrowId = localId("quick.arrow", id.id)
-  let onArrow = arrow and clickedIn(arrowId)
-  let hit = clickedIn(id) or keyActivated(id)
+  let press = enabled and pressing(id) and not (arrow and pressing(arrowId))
+  let onArrow = enabled and arrow and clickedIn(arrowId)
+  let hit = enabled and (clickedIn(id) or keyActivated(id))
   let fg = if active: t.palette.onAccent else: t.palette.textColor
+  let face = if active: selected
+             elif press: pressedButton
+             elif enabled and pointerOver(id): hovered
+             else: raised
   item(id, row(width = width, height = fixedPx(52), gap = 8,
-      alignY = centerY, padding = squeeze(padAll(10), press))
-      .bg(if active: shade(over, press, t.palette.accent, t.palette.selectedBg)
-          else: shade(over, press))
-      .corner(t.radii.button)
+      alignY = centerY, padding = squeeze(padAll(10), press or active))
+      .chrome(face)
       .focusRing(id)):
     container(col(width = grow(), gap = 2, alignY = centerY)):
       textElement(keepLine(title), TextConfig(fontSize: t.text.control,
@@ -64,16 +67,13 @@ widget focusable quickButton(title: string, subtitle: string, active: bool,
         color: if active: t.palette.onAccent else: t.palette.dimColor))
     if arrow:
       item(arrowId, row(width = fixedPx(26), height = fixedPx(26),
-          alignX = centerX, alignY = centerY)
-          .bg(if pressing(arrowId): t.palette.buttonPressBg
-              elif pointerOver(arrowId): t.palette.buttonHoverBg
-              else: Color())
-          .corner(t.radii.inner)):
-        disclosure(open,
-          if active: t.palette.onAccent else: t.palette.labelColor)
+          alignX = centerX, alignY = centerY,
+          padding = pressPadding(pressing(arrowId)))
+          .chrome(if open: pressedButton else: buttonChrome(arrowId))):
+        disclosure(open, t.palette.textColor)
   result = if onArrow: bhExpand elif hit: bhToggle else: bhNone
 
-widget slider(id: ElementId, value: int, dimmed = false) -> SliderChange:
+widget slider(id: ElementId, value: int, dimmed = false, enabled = true) -> SliderChange:
   let t = activeTheme
   let trackId = localId("slider.track", id.id)
   let fillId = localId("slider.fill", id.id)
@@ -82,7 +82,7 @@ widget slider(id: ElementId, value: int, dimmed = false) -> SliderChange:
   # the scroll container's content clamp and ratchet the track wider.
   let box = elementData(trackId).box
   var v = value
-  if box.width > 1.0 and pressing(id):
+  if enabled and box.width > 1.0 and pressing(id):
     let px = currentContext().pointerData().position.x
     let frac = min(max((px - box.x) / box.width, 0.0), 1.0)
     v = int(frac * 100.0 + 0.5)
@@ -99,12 +99,15 @@ widget slider(id: ElementId, value: int, dimmed = false) -> SliderChange:
       height = fixedPx(t.metrics.controlHeight),
       alignY = centerY, padding = padAll(4)))
   openElement(trackId, row(width = grow(min = 160.0, max = sliderTrackMax),
-      height = fixedPx(8), alignY = centerY)
-      .bg(t.palette.fieldBg).corner(t.radii.field)
-      .border(t.metrics.borderHairline, t.palette.panelBorder))
-  openElement(fillId, col(width = fixedPx(box.width * float32(v) / 100.0),
-      height = fixedPx(8))
-      .bg(if dimmed: t.palette.dimColor else: t.palette.accent).corner(t.radii.inner))
+      height = fixedPx(12), alignY = centerY, padding = padAll(2))
+      .chrome(pressedButton))
+  let fillWidth = max(0'f32, box.width - 4) * float32(v) / 100
+  let fill = col(width = fixedPx(fillWidth), height = fixedPx(8))
+  openElement(fillId,
+    if dimmed or fillWidth <= 4:
+      fill.bg(if dimmed: t.palette.dimColor else: t.palette.accent)
+    else:
+      fill.chrome(selected))
   closeElement()
   closeElement()
   closeElement()

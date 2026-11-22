@@ -1,5 +1,11 @@
 import std/[json, os, osproc, sequtils, streams, strutils]
 
+when defined(posix) and compileOption("threads"):
+  import std/[locks, posix]
+
+  var captureSpawnLock: Lock
+  initLock(captureSpawnLock)
+
 type
   ControlError* = object of CatchableError
 
@@ -38,11 +44,20 @@ type
 
 proc capture(command: string; args: seq[string]): tuple[output: string, code: int] =
   try:
-    let p = startProcess(command = command, args = args,
-                         options = {poUsePath, poStderrToStdout})
+    var p: Process
+    defer:
+      if p != nil: p.close()
+    when defined(posix) and compileOption("threads"):
+      # Keep simultaneous commands from inheriting each other's pipe ends.
+      withLock captureSpawnLock:
+        p = startProcess(command, args = args, options = {poUsePath, poStderrToStdout})
+        for fd in [p.inputHandle.cint, p.outputHandle.cint]:
+          if fcntl(fd, F_SETFD, FD_CLOEXEC) < 0:
+            raiseOSError(osLastError())
+    else:
+      p = startProcess(command, args = args, options = {poUsePath, poStderrToStdout})
     result.output = p.outputStream.readAll().strip()
     result.code = p.waitForExit()
-    close(p)
   except CatchableError as e:
     raise newException(ControlError, "Failed to run '" & command & "': " & e.msg, e)
 

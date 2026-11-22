@@ -1,20 +1,20 @@
 backend = "fastresize"
 
 palette = "salience"
-salience = { sampling = "high", intensity = "vibrant" }
-saturation = 45
+salience = { sampling = "balanced", intensity = "normal" }
 check_contrast = true
 style = "dark"
 alpha = 85
 
 [templates]
 sway  = { template = 'sway-theme.conf.j2', target = '~/.cache/wallust/sway-theme.conf' }
+# Shared Alatar palette. The filename also works with existing Wallust caches.
+bar   = { template = 'bar-theme.conf.j2', target = '~/.cache/wallust/bar-theme.conf' }
 kitty = { template = 'kitty-theme.conf.j2', target = '~/.cache/wallust/kitty-theme.conf' }
 emacs = { template = 'emacs-theme.el.j2', target = '~/.cache/wallust/wallust.el' }
 mako  = { template = 'mako.conf.j2', target = '~/.cache/wallust/mako.conf' }
 opencode = { template = 'opencode-theme.json.j2', target = '~/.config/opencode/themes/wallust.json' }
-# nomicon needs no templated hook: the app re-reads its theme file every
-# frame, so a running window repaints on its own.
+# The standalone tray uses this legacy palette.
 nomicon = { template = 'nomicon-theme.conf.j2', target = '~/.cache/wallust/nomicon-theme.conf' }
 # yazi reads its colors from this generated flavor (theme.toml selects
 # "wallust"); it lands inside the alatar-symlinked ~/.config/yazi, and the

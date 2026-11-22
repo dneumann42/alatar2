@@ -1,6 +1,6 @@
 import std/sequtils
 
-import alatar/controls
+import alatar/[controls, desktopmode]
 
 import ./state
 
@@ -11,11 +11,14 @@ template attempt(s: State, body: untyped) =
   except ControlError as e:
     s.note = e.msg
 
-proc refreshAudio(s: State) =
+proc refreshOutput(s: State) =
   attempt s:
     s.sinks = sinks()
-    s.sources = sources()
     s.volumeUi = s.defaultSink.volume
+
+proc refreshInput(s: State) =
+  attempt s:
+    s.sources = sources()
     s.micUi = s.defaultSource.volume
 
 proc syncAirplane(s: State) =
@@ -57,20 +60,50 @@ proc refreshDisplays(s: State) =
     s.monitorOn = s.outputs.anyIt(it.name == name and it.power)
     s.primaryName = primaryOutputName(s.outputs)
 
-proc refreshAll*(s: State) =
-  refreshAudio(s)
-  refreshWifi(s)
-  refreshWired(s)
-  refreshBluetooth(s)
-  refreshDisplays(s)
-  s.airplane = not s.connected
+proc loadSettings*(group: SettingsGroup): State =
+  result = newState()
+  case group
+  of settingsWifi: refreshWifi(result)
+  of settingsWired: refreshWired(result)
+  of settingsBluetooth: refreshBluetooth(result)
+  of settingsDisplays: refreshDisplays(result)
+  of settingsOutput: refreshOutput(result)
+  of settingsInput: refreshInput(result)
+
+proc applySettings*(s: State, group: SettingsGroup, loaded: State) =
+  case group
+  of settingsWifi:
+    s.wifiOn = loaded.wifiOn
+    s.networks = loaded.networks
+  of settingsWired:
+    s.wiredOn = loaded.wiredOn
+    s.wiredDevice = loaded.wiredDevice
+    s.wiredName = loaded.wiredName
+  of settingsBluetooth:
+    s.btAvailable = loaded.btAvailable
+    s.btOn = loaded.btOn
+    s.btDevices = loaded.btDevices
+  of settingsDisplays:
+    s.outputs = loaded.outputs
+    s.monitorName = loaded.monitorName
+    s.monitorOn = loaded.monitorOn
+    s.primaryName = loaded.primaryName
+  of settingsOutput:
+    s.sinks = loaded.sinks
+    s.volumeUi = loaded.volumeUi
+  of settingsInput:
+    s.sources = loaded.sources
+    s.micUi = loaded.micUi
+  s.pending.excl(group)
+  syncAirplane(s)
 
 proc refreshPanel*(s: State, panel: Panel) =
   case panel
   of panelWifi: refreshWifi(s)
   of panelWired: refreshWired(s)
   of panelBluetooth: refreshBluetooth(s)
-  of panelOutput, panelInput: refreshAudio(s)
+  of panelOutput: refreshOutput(s)
+  of panelInput: refreshInput(s)
   else: discard
 
 proc toggleWifi*(s: State) =
@@ -94,7 +127,9 @@ proc toggleAirplane*(s: State) =
     setWifiEnabled(not enable)
     if s.btAvailable: setBluetoothEnabled(not enable)
     if s.wiredDevice.len > 0: setWiredEnabled(not enable)
-    refreshAll(s)
+    refreshWifi(s)
+    refreshWired(s)
+    refreshBluetooth(s)
 
 ## `disable` (not `power off`): sway moves the vertical monitor's windows to
 ## the remaining outputs and re-applies its stored transform/position on
@@ -140,27 +175,28 @@ proc toggleDevice*(s: State, address: string) =
         else: connectBluetooth(address)
         break
     refreshBluetooth(s)
-    refreshAudio(s)
+    if settingsOutput notin s.pending: refreshOutput(s)
+    if settingsInput notin s.pending: refreshInput(s)
 
 proc toggleMute*(s: State) =
   attempt s:
     setMuted(s.defaultSink(), not s.defaultSink().muted)
-    refreshAudio(s)
+    refreshOutput(s)
 
 proc toggleMicMute*(s: State) =
   attempt s:
     setMuted(s.defaultSource(), not s.defaultSource().muted)
-    refreshAudio(s)
+    refreshInput(s)
 
 proc setSinkVolume*(s: State, percent: int) =
   attempt s:
     setVolume(s.defaultSink(), percent)
-    refreshAudio(s)
+    refreshOutput(s)
 
 proc setMicVolume*(s: State, percent: int) =
   attempt s:
     setVolume(s.defaultSource(), percent)
-    refreshAudio(s)
+    refreshInput(s)
 
 proc selectSink*(s: State, name: string) =
   attempt s:
@@ -168,7 +204,7 @@ proc selectSink*(s: State, name: string) =
       if node.name == name:
         setPreferred(node)
         break
-    refreshAudio(s)
+    refreshOutput(s)
 
 proc selectSource*(s: State, name: string) =
   attempt s:
@@ -176,13 +212,18 @@ proc selectSource*(s: State, name: string) =
       if node.name == name:
         setPreferred(node)
         break
-    refreshAudio(s)
+    refreshInput(s)
 
 proc toggleNightLight*(s: State) =
   s.nightLight = not s.nightLight
 
 proc toggleDarkStyle*(s: State) =
-  s.darkStyle = not s.darkStyle
+  try:
+    setDarkMode(not s.darkStyle)
+    s.darkStyle = not s.darkStyle
+    s.note = ""
+  except CatchableError as err:
+    s.note = "Could not save color mode: " & err.msg
 
 proc cycleBacklight*(s: State) =
   s.backlight = (s.backlight + 1) mod 3
