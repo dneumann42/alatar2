@@ -1,6 +1,7 @@
 import std/[os, osproc, posix, streams, strutils]
 
 import parsetoml
+import systemdfile
 
 import alatar/packages
 
@@ -15,6 +16,7 @@ type
     unitName*: string   # e.g. "wallpaper.service"
     kind*: ServiceKind
     sourcePath*: string
+    sessionBound, oneshot: bool
 
   SystemUnitSpec* = object
     name*: string       # unit name as shipped by a package, e.g.
@@ -76,24 +78,7 @@ proc isSessionTarget*(svc: ServiceSpec): bool =
   svc.kind == target and svc.unitName.endsWith(sessionTargetSuffix)
 
 proc needsSession*(svc: ServiceSpec): bool =
-  ## Whether a unit only works inside a running graphical session: it is a
-  ## `*-session.target`, or one of its (non-comment) [Unit] relationships
-  ## names one - wallpaper.service and polkit-gnome.service point at
-  ## sway-session.target that way.
-  if svc.isSessionTarget:
-    return true
-  if not fileExists(svc.sourcePath):
-    return false
-  try:
-    for line in readFile(svc.sourcePath).splitLines:
-      let entry = line.strip
-      if entry.len == 0 or entry[0] == '#' or entry[0] == ';':
-        continue # systemd comments: only real directives count
-      if sessionTargetSuffix in entry:
-        return true
-  except CatchableError:
-    discard
-  return false
+  svc.isSessionTarget or svc.sessionBound
 
 proc sessionLive*(): bool {.raises: [ServiceError].} =
   ## Whether a Wayland compositor has published itself to the user manager.
@@ -122,23 +107,52 @@ proc sessionLive*(): bool {.raises: [ServiceError].} =
   let socket = runtimeDir / display
   access(socket.cstring, F_OK) == 0
 
-proc loadServices*(moduleDir: string): seq[ServiceSpec] {.raises: [OSError].} =
-  ## Finds '<name>.service.toml', '<name>.timer.toml', '<name>.target.toml'
-  ## and '<name>.path.toml' files in a module directory. The '.toml' suffix
-  ## is stripped for the installed unit name.
+proc readUnit(svc: var ServiceSpec) {.raises: [ServiceError].} =
+  try:
+    let stream = newFileStream(svc.sourcePath, fmRead)
+    if stream.isNil:
+      raise newException(IOError, "could not open file")
+    defer: stream.close()
+    let document = readSystemdFile(stream)
+    var section = ""
+    for entry in document.entries:
+      case entry
+      of Section(name):
+        section = name
+      of Directive(key, value):
+        if section == "Service" and key == "Type":
+          svc.oneshot = value == "oneshot"
+        elif (section == "Unit" and key in [
+                "Wants", "Requires", "Requisite", "BindsTo", "PartOf", "Upholds",
+                "Before", "After", "Conflicts", "OnFailure", "OnSuccess",
+                "PropagatesStopTo", "StopPropagatedFrom"]) or
+             (section == "Install" and key in ["WantedBy", "RequiredBy", "UpheldBy"]):
+          for unit in value.splitWhitespace:
+            if unit.endsWith(sessionTargetSuffix):
+              svc.sessionBound = true
+      else:
+        discard
+  except CatchableError as error:
+    raise newException(ServiceError, "Failed to read '" & svc.sourcePath &
+      "': " & error.msg, error)
+
+proc loadServices*(moduleDir: string): seq[ServiceSpec] {.raises: [OSError, ServiceError].} =
   for walkKind, unitPath in walkDir(moduleDir):
     if walkKind != pcFile: continue
-    let tail = unitPath.lastPathPart
-    if tail.endsWith(".service.toml") or tail.endsWith(".timer.toml") or
-        tail.endsWith(".target.toml") or tail.endsWith(".path.toml"):
-      let unitName = tail[0 ..< tail.len - ".toml".len]
-      let kind =
-        if unitName.endsWith(".service"): service
-        elif unitName.endsWith(".timer"): timer
-        elif unitName.endsWith(".path"): path
-        else: target
-      result.add ServiceSpec(unitName: unitName, kind: kind,
-        sourcePath: unitPath)
+    var unitName = unitPath.lastPathPart
+    if unitName.endsWith(".toml"):
+      unitName.setLen(unitName.len - ".toml".len)
+      if fileExists(moduleDir / unitName):
+        continue
+    let kind = case unitName.splitFile.ext
+      of ".service": service
+      of ".timer": timer
+      of ".path": path
+      of ".target": target
+      else: continue
+    var svc = ServiceSpec(unitName: unitName, kind: kind, sourcePath: unitPath)
+    svc.readUnit()
+    result.add svc
 
 proc isActive(svc: ServiceSpec): bool {.raises: [ServiceError].} =
   systemctlCapture(@["is-active", svc.unitName]) == "active"
@@ -271,21 +285,7 @@ proc startSessionUnits*(svcs: seq[ServiceSpec]) {.raises: [ServiceError].} =
       "Starting session units failed:\n" & failures.join("\n"))
 
 proc isOneshot*(svc: ServiceSpec): bool {.raises: [].} =
-  ## Whether the unit source declares `Type=oneshot`. Scheduled units
-  ## (timers, paths, triggered checks) run briefly and return to inactive;
-  ## requiring "active" would flag every healthy oneshot as broken.
-  if not fileExists(svc.sourcePath):
-    return false
-  try:
-    for line in readFile(svc.sourcePath).splitLines:
-      let entry = line.strip
-      if entry.len == 0 or entry[0] == '#' or entry[0] == ';':
-        continue
-      if entry.toLowerAscii == "type=oneshot":
-        return true
-  except CatchableError:
-    discard
-  return false
+  svc.oneshot
 
 proc isInstalled*(svc: ServiceSpec): bool {.raises: [ServiceError].} =
   ## A unit counts as installed when its unit file is in place and matches

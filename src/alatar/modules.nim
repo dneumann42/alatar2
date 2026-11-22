@@ -72,6 +72,7 @@ proc installOwn*(module: Module, dir, modulesRoot: string): seq[ServiceSpec] {.
   ## the registry procs for that). Returns the session-bound units, which the
   ## caller starts once the whole module tree is in place (see
   ## `startSessionUnits`).
+  let services = loadServices(dir)
   # Repositories before packages: a package listed below can live in one of
   # them (steam needs [multilib], which archinstall leaves disabled).
   ensureRepos(loadRepos(dir))
@@ -92,7 +93,7 @@ proc installOwn*(module: Module, dir, modulesRoot: string): seq[ServiceSpec] {.
   # their packages are installed by now, so enabling can also start.
   installSystemUnits(loadSystemUnits(dir))
   # Units need their packages, so services come last.
-  result = installServices(loadServices(dir))
+  result = installServices(services)
 
 proc installTree(module: Module, moduleDir, modulesRoot: string,
                  sessionUnits: var seq[ServiceSpec]) {.
