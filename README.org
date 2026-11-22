@@ -24,3 +24,10 @@ Put modules under =$XDG_CONFIG_HOME/alatar/modules= and use =alatar modules=
 to list them. Use =alatar info NAME= to inspect a module and
 =alatar install NAME= to apply it. The [[file:docs/modules.org][module reference]]
 describes the supported files, native systemd units, and installation order.
+
+To clone a module repository automatically, copy =.env.example= to =.env=
+in the Alatar checkout and set =ALATAR_MODULES_REPO= to the Git URL.
+Setup and commands that read modules clone it when the default module
+directory is missing. An existing directory is used as-is. The environment
+takes precedence over the file, and a different explicit =--dir= is used
+without cloning. Set =ALATAR_HOME= to read =.env= from another directory.

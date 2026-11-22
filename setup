@@ -28,9 +28,14 @@ ALATAR_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export ALATAR_HOME="${ALATAR_HOME:-$ALATAR_ROOT}"
 
 if [ -f "$ALATAR_ROOT/.env" ]; then
+    modules_repo_override=${ALATAR_MODULES_REPO-}
+    modules_repo_was_set=${ALATAR_MODULES_REPO+x}
     set -a
     source "$ALATAR_ROOT/.env"
     set +a
+    if [[ $modules_repo_was_set ]]; then
+        export ALATAR_MODULES_REPO=$modules_repo_override
+    fi
 fi
 
 source "$ALATAR_ROOT/lib/nim.sh"
@@ -39,6 +44,10 @@ nim::ensure
 export PATH="$NIM_USER_BIN:$PATH"
 cd "$ALATAR_ROOT"
 nimble build
+
+if [[ -n ${ALATAR_MODULES_REPO:-} ]]; then
+    ./bin/alatar modules >/dev/null
+fi
 
 ALATAR_SOURCE_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/alatar/sources"
 mkdir -p "$ALATAR_SOURCE_CACHE"
@@ -58,4 +67,4 @@ for app in nomicon-settings nomicon-launcher systemdui processui; do
 done
 ln -sf "$ALATAR_ROOT/bin/alatar" "$NIM_USER_BIN/alatar"
 
-printf 'alatar: setup complete. Clone a module repository and run "alatar install all".\n' >&2
+printf 'alatar: setup complete. Run "alatar install all" once your module repository is in place.\n' >&2

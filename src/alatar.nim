@@ -1,4 +1,4 @@
-import std/[os, strutils, sequtils]
+import std/[os, osproc, strutils, sequtils]
 import terminal
 
 import alatar/[appimages, controls, fs, modules, packages, repos, services, symlinks, tidy]
@@ -23,10 +23,57 @@ proc defaultModulesDir(): string =
   ## dispatch).
   getEnv("ALATAR_MODULES_DIR", getConfigDir() / "alatar" / "modules")
 
+proc modulesRepository(): string =
+  if existsEnv("ALATAR_MODULES_REPO"):
+    return getEnv("ALATAR_MODULES_REPO")
+  let bundledEnv = getAppDir().parentDir / ".env"
+  let envFile =
+    if existsEnv("ALATAR_HOME"): getEnv("ALATAR_HOME") / ".env"
+    elif fileExists(bundledEnv): bundledEnv
+    else: getHomeDir() / ".alatar" / ".env"
+  if not fileExists(envFile):
+    return
+  for line in lines(envFile):
+    var assignment = line.strip()
+    if assignment.startsWith("export "):
+      assignment = assignment[7 .. ^1].strip()
+    let equals = assignment.find('=')
+    if equals < 0 or assignment[0 ..< equals].strip() != "ALATAR_MODULES_REPO":
+      continue
+    result = assignment[equals + 1 .. ^1].strip()
+    if result.len > 0 and result[0] in {'"', '\''}:
+      let closing = result.find(result[0], 1)
+      if closing < 0:
+        raise newException(ValueError, "Unclosed ALATAR_MODULES_REPO value in " & envFile)
+      result = result[1 ..< closing]
+    else:
+      for i, ch in result:
+        if ch == '#' and (i == 0 or result[i - 1] in {' ', '\t'}):
+          result = result[0 ..< i].strip()
+          break
+
+proc ensureModules(dir: string) =
+  if dirExists(dir):
+    return
+  if dir.absolutePath().normalizedPath() == defaultModulesDir().absolutePath().normalizedPath():
+    let repo = modulesRepository()
+    if repo.len > 0:
+      let destination = dir.absolutePath().normalizedPath()
+      if fileExists(destination) or symlinkExists(destination):
+        raise newException(IOError, "Module destination already exists: " & destination)
+      createDir(destination.parentDir())
+      let clone = startProcess("git", args = @["clone", "--", repo, destination],
+                               options = {poUsePath, poParentStreams})
+      defer: clone.close()
+      if clone.waitForExit() != 0:
+        raise newException(IOError, "Git could not clone modules into " & destination)
+      return
+  raise newException(IOError, "Module directory missing: " & dir &
+    "\nSet ALATAR_MODULES_REPO in Alatar's .env, clone a module repository there, or pass --dir.")
+
 proc loadRegistry(dir: string): ModuleRegistery =
-  if not dirExists(dir):
-    quit "alatar: module directory missing: " & dir & "\nClone a module repository there or pass --dir.", 1
   try:
+    ensureModules(dir)
     result.load(dir)
   except CatchableError as e:
     quit "alatar: cannot load module tree from '" & dir & "': " & e.msg, 1
